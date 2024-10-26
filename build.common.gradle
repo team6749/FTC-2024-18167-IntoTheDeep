@@ -18,6 +18,9 @@
 import java.util.regex.Pattern
 
 apply plugin: 'com.android.application'
+//plugins {
+//    id 'com.android.application'
+//}
 
 android {
 
