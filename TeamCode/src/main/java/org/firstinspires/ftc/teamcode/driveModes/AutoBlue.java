@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@Autonomous
+@Autonomous (name="Auto-Blue")
 
 public class AutoBlue extends OpMode {
     private Blinker control_Hub;
