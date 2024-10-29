@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.hardware.motors.GoBILDA5202Series;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class RobotVerticalExtender {
     Motor verticalMotor;
