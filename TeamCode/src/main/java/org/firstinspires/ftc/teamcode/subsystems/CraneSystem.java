@@ -8,7 +8,7 @@ public class CraneSystem {
     private RobotBucket robotBucket;
     private RobotVerticalExtender robotVerticalExtender;
 
-    CraneSystem(RobotBucket robotBucket, RobotVerticalExtender robotVerticalExtender) {
+    public CraneSystem(RobotBucket robotBucket, RobotVerticalExtender robotVerticalExtender) {
         this.robotBucket = robotBucket;
         this.robotVerticalExtender = robotVerticalExtender;
     }
