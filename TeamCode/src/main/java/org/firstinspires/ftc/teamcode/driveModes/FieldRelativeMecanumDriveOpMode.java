@@ -53,6 +53,7 @@ public class FieldRelativeMecanumDriveOpMode extends OpMode {
         }
 
         if (gamepad1.right_trigger > 0) {
+//            driveFieldRelative(0.5,0.5,0.5);
             craneSystem.dumpAtHighBasket();
         }
 

@@ -1,40 +1,40 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import org.firstinspires.ftc.teamcode.hardware.RobotBucket;
+import org.firstinspires.ftc.teamcode.hardware.RobotClaw;
 import org.firstinspires.ftc.teamcode.hardware.RobotVerticalExtender;
 
 public class CraneSystem {
 
-    private RobotBucket robotBucket;
+    private RobotClaw robotClaw;
     private RobotVerticalExtender robotVerticalExtender;
 
-    public CraneSystem(RobotBucket robotBucket, RobotVerticalExtender robotVerticalExtender) {
-        this.robotBucket = robotBucket;
+    public CraneSystem(RobotClaw robotClaw, RobotVerticalExtender robotVerticalExtender) {
+        this.robotClaw = robotClaw;
         this.robotVerticalExtender = robotVerticalExtender;
     }
 
     public void dumpAtHighBasket() {
         robotVerticalExtender.toHighBasket();
         if (robotVerticalExtender.isAtHighBasketPosition()) {
-            robotBucket.toDumpPosition();
+            robotClaw.toDumpPosition();
         }
     }
 
     public void dumpAtLowBasket() {
         robotVerticalExtender.toLowBasket();
         if (robotVerticalExtender.isAtLowBasketPosition()) {
-            robotBucket.toDumpPosition();
+            robotClaw.toDumpPosition();
         }
     }
 
     public void backToBase() {
-        robotBucket.toIntakePosition();
-        if (robotBucket.isAtIntakePosition()) {
+        robotClaw.toIntakePosition();
+        if (robotClaw.isAtIntakePosition()) {
             robotVerticalExtender.toBasePosition();
         }
     }
 
     public boolean isReadyToIntake() {
-        return robotBucket.isAtIntakePosition() && robotVerticalExtender.isAtBasePosition();
+        return robotClaw.isAtIntakePosition() && robotVerticalExtender.isAtBasePosition();
     }
 }

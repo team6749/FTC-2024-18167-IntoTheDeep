@@ -40,7 +40,9 @@ public class RobotVerticalExtender {
     }
 
     public void toPosition(int desiredPosition) {
-        verticalMotor.setTargetPosition(desiredPosition);
+//        verticalMotor.setTargetPosition(desiredPosition);
+        verticalMotor.setRunMode(Motor.RunMode.RawPower);
+    verticalMotor.set(0.3);
     }
 
     public void toHighBasket() {
