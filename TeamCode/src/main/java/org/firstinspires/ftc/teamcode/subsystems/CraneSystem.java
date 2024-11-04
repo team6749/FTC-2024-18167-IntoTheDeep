@@ -13,28 +13,33 @@ public class CraneSystem {
         this.robotVerticalExtender = robotVerticalExtender;
     }
 
-    public void dumpAtHighBasket() {
-        robotVerticalExtender.toHighBasket();
+    public void dumpAtHighBasket(float triggerPressure) {
+        robotVerticalExtender.toHighBasket(triggerPressure);
         if (robotVerticalExtender.isAtHighBasketPosition()) {
-            robotClaw.toDumpPosition();
+//            robotClaw.toDumpPosition();
         }
     }
 
-    public void dumpAtLowBasket() {
-        robotVerticalExtender.toLowBasket();
+    public void dumpAtLowBasket(float triggerPressure) {
+        robotVerticalExtender.toLowBasket(triggerPressure);
         if (robotVerticalExtender.isAtLowBasketPosition()) {
-            robotClaw.toDumpPosition();
+//            robotClaw.toDumpPosition();
         }
     }
 
-    public void backToBase() {
-        robotClaw.toIntakePosition();
-        if (robotClaw.isAtIntakePosition()) {
-            robotVerticalExtender.toBasePosition();
-        }
+    public void backToBase(float triggerPressure) {
+//        robotClaw.toIntakePosition();
+//        if (robotClaw.isAtIntakePosition()) {
+            robotVerticalExtender.toBasePosition(triggerPressure);
+//        }
     }
 
     public boolean isReadyToIntake() {
-        return robotClaw.isAtIntakePosition() && robotVerticalExtender.isAtBasePosition();
+//        return robotClaw.isAtIntakePosition() && robotVerticalExtender.isAtBasePosition();
+        return true;
+    }
+
+    public void stop() {
+        robotVerticalExtender.stop();
     }
 }

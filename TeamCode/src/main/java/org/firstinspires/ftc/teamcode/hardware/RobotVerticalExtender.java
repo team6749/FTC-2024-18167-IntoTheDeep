@@ -8,11 +8,14 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class RobotVerticalExtender {
     Motor verticalMotor;
-    static final double COUNTS_PER_REVOLUTION = 537.6;// # Adjust this for the specific motor encoder counts per revolution
+    static final double COUNTS_PER_REVOLUTION = 384.5 ;// # Adjust this for the specific motor encoder counts per revolution
     public RobotVerticalExtender(HardwareMap hwMap) {
         verticalMotor = new Motor(hwMap, "vertical_motor", Motor.GoBILDA.RPM_435);
         verticalMotor.setRunMode(Motor.RunMode.PositionControl);
-        verticalMotor.set(1);
+        verticalMotor.setTargetPosition(0);
+        verticalMotor.setPositionTolerance(50);
+        verticalMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        verticalMotor.set(0);
 
         // Set the motor to run using encoders
 //        verticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -39,22 +42,35 @@ public class RobotVerticalExtender {
 
     }
 
-    public void toPosition(int desiredPosition) {
-//        verticalMotor.setTargetPosition(desiredPosition);
-        verticalMotor.setRunMode(Motor.RunMode.RawPower);
-    verticalMotor.set(0.3);
+    public void toPosition(int desiredPosition, float triggerPressure) {
+//        if(verticalMotor.atTargetPosition()) {
+//            verticalMotor.set(0);
+//        } else {
+            verticalMotor.setTargetPosition(desiredPosition);
+            if (verticalMotor.atTargetPosition()) {
+                verticalMotor.set(0);
+            } else {
+                verticalMotor.set(1);
+                //verticalMotor.setPositionCoefficient(.025);
+            }
+
+//        }
+//    verticalMotor.set(0.3);
+//        verticalMot
+//        ((DcMotorEx) armMotor).setVelocity(2100);
+
     }
 
-    public void toHighBasket() {
-        toPosition(HIGH_BASKET_HEIGHT);
+    public void toHighBasket(float triggerPressure) {
+        toPosition(HIGH_BASKET_HEIGHT, triggerPressure);
     }
 
-    public void toLowBasket() {
-        toPosition(LOW_BASKET_HEIGHT);
+    public void toLowBasket(float triggerPressure) {
+        toPosition(LOW_BASKET_HEIGHT, triggerPressure);
     }
 
-    public void toBasePosition() {
-        toPosition(BASE_HEIGHT);
+    public void toBasePosition(float triggerPressure) {
+        toPosition(BASE_HEIGHT, triggerPressure);
     }
 
     public boolean isAtBasePosition() {
@@ -70,5 +86,9 @@ public class RobotVerticalExtender {
 
     private boolean isAtPosition(int positionToCheck) {
         return Math.abs(verticalMotor.getCurrentPosition() - positionToCheck) <= POSITION_TOLERANCE;
+    }
+
+    public void stop() {
+        verticalMotor.set(0);
     }
 }
