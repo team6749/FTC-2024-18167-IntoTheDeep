@@ -9,11 +9,19 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 public class RobotVerticalExtender {
     Motor verticalMotor;
     static final double COUNTS_PER_REVOLUTION = 384.5 ;// # Adjust this for the specific motor encoder counts per revolution
+    public static int MAX_HEIGHT = 50; //TODO - put in a real value
+    public static int MIN_HEIGHT = 0;
+    public static int BASE_HEIGHT = 5; //TODO - put in a real value
+
+    public static int LOW_BASKET_HEIGHT = 20; //TODO - put in a real value
+    public static int HIGH_BASKET_HEIGHT = (int) (1 * COUNTS_PER_REVOLUTION); //TODO - put in a real value
+    public static int POSITION_TOLERANCE = 5; //TODO - put in a real value
     public RobotVerticalExtender(HardwareMap hwMap) {
         verticalMotor = new Motor(hwMap, "vertical_motor", Motor.GoBILDA.RPM_435);
         verticalMotor.setRunMode(Motor.RunMode.PositionControl);
-        verticalMotor.setTargetPosition(0);
-        verticalMotor.setPositionTolerance(50);
+        verticalMotor.resetEncoder();
+        //verticalMotor.setTargetPosition(0);
+        verticalMotor.setPositionTolerance(POSITION_TOLERANCE);
         verticalMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         verticalMotor.set(0);
 
@@ -24,13 +32,7 @@ public class RobotVerticalExtender {
 
     }
 
-    public static int MAX_HEIGHT = 50; //TODO - put in a real value
-    public static int MIN_HEIGHT = 0;
-    public static int BASE_HEIGHT = 5; //TODO - put in a real value
 
-    public static int LOW_BASKET_HEIGHT = 20; //TODO - put in a real value
-    public static int HIGH_BASKET_HEIGHT = (int) (7.5 * COUNTS_PER_REVOLUTION); //TODO - put in a real value
-    public static int POSITION_TOLERANCE = 5; //TODO - put in a real value
 
 
 
@@ -50,8 +52,8 @@ public class RobotVerticalExtender {
             if (verticalMotor.atTargetPosition()) {
                 verticalMotor.set(0);
             } else {
+                verticalMotor.setPositionCoefficient(0.005);
                 verticalMotor.set(1);
-                //verticalMotor.setPositionCoefficient(.025);
             }
 
 //        }
@@ -91,4 +93,7 @@ public class RobotVerticalExtender {
     public void stop() {
         verticalMotor.set(0);
     }
-}
+
+public int getPosition(){
+        return verticalMotor.getCurrentPosition();
+}}

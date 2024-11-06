@@ -42,4 +42,7 @@ public class CraneSystem {
     public void stop() {
         robotVerticalExtender.stop();
     }
+public int getCurrentHeight(){
+        return robotVerticalExtender.getPosition();
+}
 }

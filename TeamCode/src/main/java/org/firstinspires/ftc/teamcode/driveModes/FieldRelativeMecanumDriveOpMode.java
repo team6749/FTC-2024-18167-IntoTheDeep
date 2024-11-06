@@ -60,6 +60,6 @@ public class FieldRelativeMecanumDriveOpMode extends OpMode {
         } else {
             craneSystem.stop();
         }
-
+telemetry.addData("Vertical Motor enc", craneSystem.getCurrentHeight());
     }
 }
