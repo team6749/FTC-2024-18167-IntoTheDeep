@@ -53,8 +53,13 @@ public class FieldRelativeMecanumDriveOpMode extends OpMode {
         }
 
         if (gamepad1.right_trigger > 0) {
-            craneSystem.dumpAtHighBasket();
+            craneSystem.dumpAtHighBasket(gamepad1.right_trigger);
+            System.out.println(gamepad1.right_trigger);
+        } else if (gamepad1.left_trigger > 0) {
+            craneSystem.backToBase(gamepad1.left_trigger);
+        } else {
+            craneSystem.stop();
         }
-
+telemetry.addData("Vertical Motor enc", craneSystem.getCurrentHeight());
     }
 }

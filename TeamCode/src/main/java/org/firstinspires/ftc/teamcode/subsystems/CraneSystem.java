@@ -1,40 +1,48 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import org.firstinspires.ftc.teamcode.hardware.RobotBucket;
+import org.firstinspires.ftc.teamcode.hardware.RobotClaw;
 import org.firstinspires.ftc.teamcode.hardware.RobotVerticalExtender;
 
 public class CraneSystem {
 
-    private RobotBucket robotBucket;
+    private RobotClaw robotClaw;
     private RobotVerticalExtender robotVerticalExtender;
 
-    public CraneSystem(RobotBucket robotBucket, RobotVerticalExtender robotVerticalExtender) {
-        this.robotBucket = robotBucket;
+    public CraneSystem(RobotClaw robotClaw, RobotVerticalExtender robotVerticalExtender) {
+        this.robotClaw = robotClaw;
         this.robotVerticalExtender = robotVerticalExtender;
     }
 
-    public void dumpAtHighBasket() {
-        robotVerticalExtender.toHighBasket();
+    public void dumpAtHighBasket(float triggerPressure) {
+        robotVerticalExtender.toHighBasket(triggerPressure);
         if (robotVerticalExtender.isAtHighBasketPosition()) {
-            robotBucket.toDumpPosition();
+//            robotClaw.toDumpPosition();
         }
     }
 
-    public void dumpAtLowBasket() {
-        robotVerticalExtender.toLowBasket();
+    public void dumpAtLowBasket(float triggerPressure) {
+        robotVerticalExtender.toLowBasket(triggerPressure);
         if (robotVerticalExtender.isAtLowBasketPosition()) {
-            robotBucket.toDumpPosition();
+//            robotClaw.toDumpPosition();
         }
     }
 
-    public void backToBase() {
-        robotBucket.toIntakePosition();
-        if (robotBucket.isAtIntakePosition()) {
-            robotVerticalExtender.toBasePosition();
-        }
+    public void backToBase(float triggerPressure) {
+//        robotClaw.toIntakePosition();
+//        if (robotClaw.isAtIntakePosition()) {
+            robotVerticalExtender.toBasePosition(triggerPressure);
+//        }
     }
 
     public boolean isReadyToIntake() {
-        return robotBucket.isAtIntakePosition() && robotVerticalExtender.isAtBasePosition();
+//        return robotClaw.isAtIntakePosition() && robotVerticalExtender.isAtBasePosition();
+        return true;
     }
+
+    public void stop() {
+        robotVerticalExtender.stop();
+    }
+public int getCurrentHeight(){
+        return robotVerticalExtender.getPosition();
+}
 }
