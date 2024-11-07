@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.MecanumDrive;
-import org.firstinspires.ftc.teamcode.hardware.RobotVerticalExtender;
+import org.firstinspires.ftc.teamcode.hardware.RobotArm;
 import org.firstinspires.ftc.teamcode.subsystems.CraneSystem;
 
 @TeleOp(name="TeleOp: Field-Oriented", group="Iterative OpMode")
@@ -20,7 +20,7 @@ public class FieldRelativeMecanumDriveOpMode extends OpMode {
     public void init() {
         drive.init(hardwareMap);
         imu = hardwareMap.get(IMU.class, "imu");
-        craneSystem = new CraneSystem(null, new RobotVerticalExtender(hardwareMap));
+        craneSystem = new CraneSystem(null, new RobotArm(hardwareMap));
         RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
         imu.initialize(new IMU.Parameters(revHubOrientationOnRobot));
     }
