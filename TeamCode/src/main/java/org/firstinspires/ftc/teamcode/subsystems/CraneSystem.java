@@ -42,7 +42,12 @@ public class CraneSystem {
     public void stop() {
         robotArm.stop();
     }
-public int getCurrentHeight(){
-        return robotArm.getPosition();
+public int getCurrentExtension(){
+        return robotArm.getExtensionPosition();
 }
+
+    public int getCurrentRotation(){
+        return robotArm.getRotationPosition();
+    }
+
 }

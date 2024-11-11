@@ -19,8 +19,8 @@ public class RobotArm {
 
     public static int ROTATE_BASE = 0;
     public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
-    //public static int ROTATE_HIGH_BASKET = 61.16 degrees; //TODO - put in a real value
-    public static int POSITION_TOLERANCE_LIFT = 5;
+    public static int ROTATE_HIGH_BASKET = 60;//61.16 degrees; //TODO - put in a real value
+    public static int POSITION_TOLERANCE_LIFT = 10;
     public static int BASE_ANGLE = 5;
     public RobotArm(HardwareMap hwMap) {
         extenderMotor = new Motor(hwMap, "extender_motor", Motor.GoBILDA.RPM_435);
@@ -48,9 +48,9 @@ public class RobotArm {
 
 
 
-    /*public void rotateToHighBasket() {
+    public void rotateToHighBasket() {
         rotateToPosition(ROTATE_HIGH_BASKET);
-    *}
+    }
 
     public void rotateToLowBasket() {
         rotateToPosition(ROTATE_LOW_BASKET);
@@ -59,7 +59,7 @@ public class RobotArm {
     public void rotateToBase() {
         rotateToPosition(ROTATE_BASE);
     }
-*
+
 
 
     public void rotateToPosition(int desiredPosition){
@@ -68,14 +68,18 @@ public class RobotArm {
             liftMotor.setPower(0);
         }
         else{
-            liftMotor.setPower(1);
+            if (liftMotor.getCurrentPosition() <= desiredPosition){
+                liftMotor.setPower(0.05);
+            }else {
+                liftMotor.setPower(-0.05);
+            }
         }
     }
-*/
-    /*public boolean liftMotorAtSetPoint(int desiredPosition) {
+
+    public boolean liftMotorAtSetPoint(int desiredPosition) {
         return Math.abs(liftMotor.getCurrentPosition()-desiredPosition) < POSITION_TOLERANCE_LIFT;
     }
-*/
+
     public void slideToPosition(int desiredPosition, float triggerPressure) {
 
             extenderMotor.setTargetPosition(desiredPosition);
@@ -88,20 +92,20 @@ public class RobotArm {
 
     }
 
-    /*public void toHighBasket(float triggerPressure) {
+    public void toHighBasket(float triggerPressure) {
         slideToPosition(EXTENSION_HIGH_BASKET, triggerPressure);
         rotateToHighBasket();
     }
-*/
+
     public void toLowBasket(float triggerPressure) {
         slideToPosition(EXTENSION_LOW_BASKET, triggerPressure);
     }
 
-    /*public void toBasePosition(float triggerPressure) {
+    public void toBasePosition(float triggerPressure) {
         slideToPosition(EXTENSION_BASE, triggerPressure);
         rotateToBase();
     }
-*/
+
     public boolean isAtBasePosition() {
         return isExtenderAtPosition(EXTENSION_BASE);
     }
@@ -119,8 +123,14 @@ public class RobotArm {
 
     public void stop() {
         extenderMotor.set(0);
+        liftMotor.setPower(0);
     }
 
-public int getPosition(){
+public int getExtensionPosition(){
         return extenderMotor.getCurrentPosition();
-}}
+}
+
+public int getRotationPosition() {
+        return liftMotor.getCurrentPosition();
+}
+}

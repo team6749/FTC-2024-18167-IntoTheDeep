@@ -8,12 +8,14 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.MecanumDrive;
 import org.firstinspires.ftc.teamcode.hardware.RobotArm;
+import org.firstinspires.ftc.teamcode.hardware.RobotClaw;
 import org.firstinspires.ftc.teamcode.subsystems.CraneSystem;
 
 @TeleOp(name="TeleOp: Field-Oriented", group="Iterative OpMode")
 public class FieldRelativeMecanumDriveOpMode extends OpMode {
     MecanumDrive drive = new MecanumDrive();
     CraneSystem craneSystem;
+    RobotClaw robotClaw;
     IMU imu;
 
     @Override
@@ -21,6 +23,7 @@ public class FieldRelativeMecanumDriveOpMode extends OpMode {
         drive.init(hardwareMap);
         imu = hardwareMap.get(IMU.class, "imu");
         craneSystem = new CraneSystem(null, new RobotArm(hardwareMap));
+        robotClaw = new RobotClaw(hardwareMap);
         RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.UP, RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
         imu.initialize(new IMU.Parameters(revHubOrientationOnRobot));
     }
@@ -60,6 +63,26 @@ public class FieldRelativeMecanumDriveOpMode extends OpMode {
         } else {
             craneSystem.stop();
         }
-telemetry.addData("Vertical Motor enc", craneSystem.getCurrentHeight());
+
+        //Claw Movement
+        if (gamepad1.x) {
+            robotClaw.openClaw();
+        }
+        if (gamepad1.y){
+            robotClaw.closeClaw();
+        }
+
+
+        // Wrist movement
+        if (gamepad1.a){
+            robotClaw.toWristLeft();
+        } else if (gamepad1.b){
+            robotClaw.toWristRight();
+        } else {
+            robotClaw.toWristCenter();
+        }
+
+        telemetry.addData("Extender Motor enc", craneSystem.getCurrentExtension());
+        telemetry.addData("Lift Motor enc", craneSystem.getCurrentRotation());
     }
 }
