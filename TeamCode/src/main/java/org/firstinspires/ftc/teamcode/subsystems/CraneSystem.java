@@ -7,10 +7,12 @@ public class CraneSystem {
 
     private RobotClaw robotClaw;
     private RobotArm robotArm;
+    public boolean IS_IN_DANGER_ZONE;
 
     public CraneSystem(RobotClaw robotClaw, RobotArm robotArm) {
         this.robotClaw = robotClaw;
         this.robotArm = robotArm;
+        this.IS_IN_DANGER_ZONE = robotArm.isInDangerZone();
     }
 
     public void dumpAtHighBasket(float triggerPressure) {

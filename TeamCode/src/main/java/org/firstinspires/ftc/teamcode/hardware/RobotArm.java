@@ -10,7 +10,11 @@ public class RobotArm {
     Motor extenderMotor;
     DcMotorEx liftMotor;
 
-    static final double COUNTS_PER_REVOLUTION = 384.5 ;// # Adjust this for the specific motor encoder counts per revolution
+    static final double COUNTS_PER_REVOLUTION = 384.5;
+    static final int LIFT_COUNTS_PER_REVOLUTION = 28;// # Adjust this for the specific motor encoder counts per revolution
+    static final int GEAR_RATIO = 80;
+    static final int CHAIN_RATIO = 40/20;
+    static final double HIGH_BASKET_ANGLE_RATIO = 0.175;
     public static int EXTENSION_BASE = 5; //TODO - put in a real value
 
     public static int EXTENSION_LOW_BASKET = 20; //TODO - put in a real value
@@ -19,9 +23,10 @@ public class RobotArm {
 
     public static int ROTATE_BASE = 0;
     public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
-    public static int ROTATE_HIGH_BASKET = 60;//61.16 degrees; //TODO - put in a real value
+    public static int ROTATE_HIGH_BASKET = (int) (LIFT_COUNTS_PER_REVOLUTION * 28 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     public static int POSITION_TOLERANCE_LIFT = 10;
     public static int BASE_ANGLE = 5;
+    public boolean IS_IN_DANGER_ZONE = true;
     public RobotArm(HardwareMap hwMap) {
         extenderMotor = new Motor(hwMap, "extender_motor", Motor.GoBILDA.RPM_435);
         extenderMotor.setRunMode(Motor.RunMode.PositionControl);
@@ -133,4 +138,11 @@ public int getExtensionPosition(){
 public int getRotationPosition() {
         return liftMotor.getCurrentPosition();
 }
+public boolean isInDangerZone(){
+        if (extenderMotor.getCurrentPosition() > 50){ //TODO: Put in a real value
+        IS_IN_DANGER_ZONE = false;
+        }
+        else {IS_IN_DANGER_ZONE = true;}
+return IS_IN_DANGER_ZONE;
+    }
 }
