@@ -15,12 +15,14 @@ public class RobotClaw {
         rightClawServo = hwMap.get(Servo.class,"right_claw_servo");
     }
     public void openClaw() {
-
+        leftClawServo.setPosition(0);
+        rightClawServo.setPosition(1);
     }
 
 
     public void closeClaw() {
-
+        leftClawServo.setPosition(1);
+        rightClawServo.setPosition(0);
     }
 
     public boolean isOpen() {
@@ -28,15 +30,15 @@ public class RobotClaw {
     }
 
     public void toWristLeft() {
-
+    wristServo.setPosition(0);
     }
 
     public void toWristCenter() {
-
+    wristServo.setPosition(0.5);
     }
 
     public void toWristRight() {
-
+    wristServo.setPosition(1);
     }
     private void turnWrist() {
 

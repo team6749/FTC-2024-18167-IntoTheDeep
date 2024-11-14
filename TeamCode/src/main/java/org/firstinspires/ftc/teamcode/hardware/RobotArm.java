@@ -1,0 +1,148 @@
+package org.firstinspires.ftc.teamcode.hardware;
+
+
+import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+public class RobotArm {
+    Motor extenderMotor;
+    DcMotorEx liftMotor;
+
+    static final double COUNTS_PER_REVOLUTION = 384.5;
+    static final int LIFT_COUNTS_PER_REVOLUTION = 28;// # Adjust this for the specific motor encoder counts per revolution
+    static final int GEAR_RATIO = 80;
+    static final int CHAIN_RATIO = 40/20;
+    static final double HIGH_BASKET_ANGLE_RATIO = 0.175;
+    public static int EXTENSION_BASE = 5; //TODO - put in a real value
+
+    public static int EXTENSION_LOW_BASKET = 20; //TODO - put in a real value
+    public static int EXTENSION_HIGH_BASKET = (int) (1 * COUNTS_PER_REVOLUTION); //43 in out //TODO - put in a real value
+    public static int POSITION_TOLERANCE_EXTENDER = 5;
+
+    public static int ROTATE_BASE = 0;
+    public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
+    public static int ROTATE_HIGH_BASKET = (int) (LIFT_COUNTS_PER_REVOLUTION * 28 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int POSITION_TOLERANCE_LIFT = 10;
+    public static int BASE_ANGLE = 5;
+    public boolean IS_IN_DANGER_ZONE = true;
+    public RobotArm(HardwareMap hwMap) {
+        extenderMotor = new Motor(hwMap, "extender_motor", Motor.GoBILDA.RPM_435);
+        extenderMotor.setRunMode(Motor.RunMode.PositionControl);
+        extenderMotor.resetEncoder();
+        extenderMotor.setInverted(true);
+        //verticalMotor.setTargetPosition(0);
+        extenderMotor.setPositionTolerance(POSITION_TOLERANCE_EXTENDER);
+        extenderMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        extenderMotor.set(0);
+
+        // Set the motor to run using encoders
+//        verticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        liftMotor = hwMap.get(DcMotorEx.class, "lift_motor");
+        liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        liftMotor.setTargetPositionTolerance(POSITION_TOLERANCE_LIFT);
+        liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        liftMotor.setPower(0);
+
+    }
+
+
+
+
+
+    public void rotateToHighBasket() {
+        rotateToPosition(ROTATE_HIGH_BASKET);
+    }
+
+    public void rotateToLowBasket() {
+        rotateToPosition(ROTATE_LOW_BASKET);
+    }
+
+    public void rotateToBase() {
+        rotateToPosition(ROTATE_BASE);
+    }
+
+
+
+    public void rotateToPosition(int desiredPosition){
+        liftMotor.setTargetPosition(desiredPosition);
+        if (liftMotorAtSetPoint(desiredPosition)) {
+            liftMotor.setPower(0);
+        }
+        else{
+            if (liftMotor.getCurrentPosition() <= desiredPosition){
+                liftMotor.setPower(0.05);
+            }else {
+                liftMotor.setPower(-0.05);
+            }
+        }
+    }
+
+    public boolean liftMotorAtSetPoint(int desiredPosition) {
+        return Math.abs(liftMotor.getCurrentPosition()-desiredPosition) < POSITION_TOLERANCE_LIFT;
+    }
+
+    public void slideToPosition(int desiredPosition, float triggerPressure) {
+
+            extenderMotor.setTargetPosition(desiredPosition);
+            if (extenderMotor.atTargetPosition()) {
+                extenderMotor.set(0);
+            } else {
+                extenderMotor.setPositionCoefficient(0.005);
+                extenderMotor.set(1);
+            }
+
+    }
+
+    public void toHighBasket(float triggerPressure) {
+        slideToPosition(EXTENSION_HIGH_BASKET, triggerPressure);
+        rotateToHighBasket();
+    }
+
+    public void toLowBasket(float triggerPressure) {
+        slideToPosition(EXTENSION_LOW_BASKET, triggerPressure);
+    }
+
+    public void toBasePosition(float triggerPressure) {
+        slideToPosition(EXTENSION_BASE, triggerPressure);
+        rotateToBase();
+    }
+
+    public boolean isAtBasePosition() {
+        return isExtenderAtPosition(EXTENSION_BASE);
+    }
+
+    public boolean isAtLowBasketPosition() {
+        return isExtenderAtPosition(EXTENSION_LOW_BASKET);
+    }
+    public boolean isAtHighBasketPosition() {
+        return isExtenderAtPosition(EXTENSION_HIGH_BASKET);
+    }
+
+    private boolean isExtenderAtPosition(int positionToCheck) {
+        return Math.abs(extenderMotor.getCurrentPosition() - positionToCheck) <= POSITION_TOLERANCE_EXTENDER;
+    }
+
+    public void stop() {
+        extenderMotor.set(0);
+        liftMotor.setPower(0);
+    }
+
+public int getExtensionPosition(){
+        return extenderMotor.getCurrentPosition();
+}
+
+public int getRotationPosition() {
+        return liftMotor.getCurrentPosition();
+}
+public boolean isInDangerZone(){
+        if (extenderMotor.getCurrentPosition() > 50){ //TODO: Put in a real value
+        IS_IN_DANGER_ZONE = false;
+        }
+        else {IS_IN_DANGER_ZONE = true;}
+return IS_IN_DANGER_ZONE;
+    }
+}

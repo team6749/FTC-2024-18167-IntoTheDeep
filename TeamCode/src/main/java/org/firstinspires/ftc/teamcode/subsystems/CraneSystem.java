@@ -1,28 +1,30 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
 import org.firstinspires.ftc.teamcode.hardware.RobotClaw;
-import org.firstinspires.ftc.teamcode.hardware.RobotVerticalExtender;
+import org.firstinspires.ftc.teamcode.hardware.RobotArm;
 
 public class CraneSystem {
 
     private RobotClaw robotClaw;
-    private RobotVerticalExtender robotVerticalExtender;
+    private RobotArm robotArm;
+    public boolean IS_IN_DANGER_ZONE;
 
-    public CraneSystem(RobotClaw robotClaw, RobotVerticalExtender robotVerticalExtender) {
+    public CraneSystem(RobotClaw robotClaw, RobotArm robotArm) {
         this.robotClaw = robotClaw;
-        this.robotVerticalExtender = robotVerticalExtender;
+        this.robotArm = robotArm;
+        this.IS_IN_DANGER_ZONE = robotArm.isInDangerZone();
     }
 
     public void dumpAtHighBasket(float triggerPressure) {
-        robotVerticalExtender.toHighBasket(triggerPressure);
-        if (robotVerticalExtender.isAtHighBasketPosition()) {
+        robotArm.toHighBasket(triggerPressure);
+        if (robotArm.isAtHighBasketPosition()) {
 //            robotClaw.toDumpPosition();
         }
     }
 
     public void dumpAtLowBasket(float triggerPressure) {
-        robotVerticalExtender.toLowBasket(triggerPressure);
-        if (robotVerticalExtender.isAtLowBasketPosition()) {
+        robotArm.toLowBasket(triggerPressure);
+        if (robotArm.isAtLowBasketPosition()) {
 //            robotClaw.toDumpPosition();
         }
     }
@@ -30,7 +32,7 @@ public class CraneSystem {
     public void backToBase(float triggerPressure) {
 //        robotClaw.toIntakePosition();
 //        if (robotClaw.isAtIntakePosition()) {
-            robotVerticalExtender.toBasePosition(triggerPressure);
+            robotArm.toBasePosition(triggerPressure);
 //        }
     }
 
@@ -40,9 +42,14 @@ public class CraneSystem {
     }
 
     public void stop() {
-        robotVerticalExtender.stop();
+        robotArm.stop();
     }
-public int getCurrentHeight(){
-        return robotVerticalExtender.getPosition();
+public int getCurrentExtension(){
+        return robotArm.getExtensionPosition();
 }
+
+    public int getCurrentRotation(){
+        return robotArm.getRotationPosition();
+    }
+
 }
