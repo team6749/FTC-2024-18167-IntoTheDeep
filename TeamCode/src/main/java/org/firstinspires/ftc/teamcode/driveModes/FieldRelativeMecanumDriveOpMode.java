@@ -74,10 +74,14 @@ public class FieldRelativeMecanumDriveOpMode extends OpMode {
 
 
         // Wrist movement
-        if (gamepad1.a && !craneSystem.IS_IN_DANGER_ZONE){
+        if (gamepad1.a){// && !craneSystem.IS_IN_DANGER_ZONE){
             robotClaw.toWristLeft();
-        } else if (gamepad1.b && !craneSystem.IS_IN_DANGER_ZONE){
+            telemetry.addData("Wrist", "left");
+
+        } else if (gamepad1.b){// && !craneSystem.IS_IN_DANGER_ZONE){
             robotClaw.toWristRight();
+            telemetry.addData("Wrist", "right");
+
         } else {
             robotClaw.toWristCenter();
         }
