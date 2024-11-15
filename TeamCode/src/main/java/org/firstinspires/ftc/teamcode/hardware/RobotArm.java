@@ -13,20 +13,26 @@ public class RobotArm {
     static final double COUNTS_PER_REVOLUTION = 384.5;
     static final int LIFT_COUNTS_PER_REVOLUTION = 28;// # Adjust this for the specific motor encoder counts per revolution
     static final int GEAR_RATIO = 80;
-    static final int CHAIN_RATIO = 40/20;
+    static final int CHAIN_RATIO = 40 / 20;
     static final double HIGH_BASKET_ANGLE_RATIO = 0.175;
-    public static int EXTENSION_BASE = 5; //TODO - put in a real value
-
+    public static int EXTENSION_MIN = 0; //TODO - put in a real value
+    public static int EXTENSION_DRIVE = (int) (1 * COUNTS_PER_REVOLUTION);
+    public static int EXTENSION_MAX = (int) (8 * COUNTS_PER_REVOLUTION); //TODO - put in a real value
     public static int EXTENSION_LOW_BASKET = 20; //TODO - put in a real value
-    public static int EXTENSION_HIGH_BASKET = (int) (1 * COUNTS_PER_REVOLUTION); //43 in out //TODO - put in a real value
+    public static int EXTENSION_HIGH_BASKET = (int) (7.5 * COUNTS_PER_REVOLUTION); //43 in out //TODO - put in a real value
     public static int POSITION_TOLERANCE_EXTENDER = 5;
 
-    public static int ROTATE_BASE = 0;
+    public static int ROTATE_MIN = 0;
+    public static int ROTATE_DRIVE = 10;
     public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
     public static int ROTATE_HIGH_BASKET = (int) (LIFT_COUNTS_PER_REVOLUTION * 28 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_MAX = (int) (LIFT_COUNTS_PER_REVOLUTION * 28 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+
     public static int POSITION_TOLERANCE_LIFT = 10;
     public static int BASE_ANGLE = 5;
-    public boolean IS_IN_DANGER_ZONE = true;
+
+    RobotClaw robotClaw;
+
     public RobotArm(HardwareMap hwMap) {
         extenderMotor = new Motor(hwMap, "extender_motor", Motor.GoBILDA.RPM_435);
         extenderMotor.setRunMode(Motor.RunMode.PositionControl);
@@ -47,10 +53,8 @@ public class RobotArm {
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftMotor.setPower(0);
 
+        robotClaw = new RobotClaw(hwMap);
     }
-
-
-
 
 
     public void rotateToHighBasket() {
@@ -62,62 +66,84 @@ public class RobotArm {
     }
 
     public void rotateToBase() {
-        rotateToPosition(ROTATE_BASE);
+        rotateToPosition(ROTATE_MIN);
     }
 
 
-
-    public void rotateToPosition(int desiredPosition){
+    public void rotateToPosition(int desiredPosition) {
         liftMotor.setTargetPosition(desiredPosition);
-        if (liftMotorAtSetPoint(desiredPosition)) {
+        if (isAtRotation(desiredPosition)) {
             liftMotor.setPower(0);
-        }
-        else{
-            if (liftMotor.getCurrentPosition() <= desiredPosition){
+        } else {
+            if (liftMotor.getCurrentPosition() <= desiredPosition) {
                 liftMotor.setPower(0.05);
-            }else {
+            } else {
                 liftMotor.setPower(-0.05);
             }
         }
     }
 
-    public boolean liftMotorAtSetPoint(int desiredPosition) {
-        return Math.abs(liftMotor.getCurrentPosition()-desiredPosition) < POSITION_TOLERANCE_LIFT;
+    public boolean isAtRotation(int desiredPosition) {
+        return Math.abs(liftMotor.getCurrentPosition() - desiredPosition) < POSITION_TOLERANCE_LIFT;
     }
 
-    public void slideToPosition(int desiredPosition, float triggerPressure) {
 
-            extenderMotor.setTargetPosition(desiredPosition);
-            if (extenderMotor.atTargetPosition()) {
-                extenderMotor.set(0);
-            } else {
-                extenderMotor.setPositionCoefficient(0.005);
-                extenderMotor.set(1);
+    public void slideToPosition(int desiredPosition) {
+
+        extenderMotor.setTargetPosition(desiredPosition);
+        if (extenderMotor.atTargetPosition()) {
+            extenderMotor.set(0);
+        } else {
+            extenderMotor.setPositionCoefficient(0.005);
+            extenderMotor.set(1);
+        }
+
+    }
+
+    private boolean isArmLow() {
+        return liftMotor.getCurrentPosition() < (ROTATE_DRIVE - POSITION_TOLERANCE_LIFT);
+    }
+
+    private boolean isAtDriveRotation() {
+        return isAtRotation(ROTATE_DRIVE);
+    }
+
+    private boolean isAtDriveExtension() {
+        return isExtenderAtPosition(EXTENSION_DRIVE);
+    }
+    public void driveMode() {
+        //If the arm is low, get the arm up first, then retract
+
+        if (isArmLow()) {
+            rotateToPosition(ROTATE_DRIVE);
+            if (isAtDriveRotation()) {
+                slideToPosition(EXTENSION_DRIVE);
             }
-
+        } else {
+            slideToPosition(EXTENSION_DRIVE);
+            if (isAtDriveExtension()) {
+                rotateToPosition(ROTATE_DRIVE);
+            }
+        }
     }
-
-    public void toHighBasket(float triggerPressure) {
-        slideToPosition(EXTENSION_HIGH_BASKET, triggerPressure);
+    public void toHighBasket() {
+        slideToPosition(EXTENSION_HIGH_BASKET);
         rotateToHighBasket();
     }
 
-    public void toLowBasket(float triggerPressure) {
-        slideToPosition(EXTENSION_LOW_BASKET, triggerPressure);
+    public void toLowBasket() {
+        slideToPosition(EXTENSION_LOW_BASKET);
     }
 
-    public void toBasePosition(float triggerPressure) {
-        slideToPosition(EXTENSION_BASE, triggerPressure);
-        rotateToBase();
-    }
 
-    public boolean isAtBasePosition() {
-        return isExtenderAtPosition(EXTENSION_BASE);
+    public boolean isFullyRetracted() {
+        return isExtenderAtPosition(EXTENSION_MIN);
     }
 
     public boolean isAtLowBasketPosition() {
         return isExtenderAtPosition(EXTENSION_LOW_BASKET);
     }
+
     public boolean isAtHighBasketPosition() {
         return isExtenderAtPosition(EXTENSION_HIGH_BASKET);
     }
@@ -131,18 +157,68 @@ public class RobotArm {
         liftMotor.setPower(0);
     }
 
-public int getExtensionPosition(){
+    public int getCurrentExtensionPosition() {
         return extenderMotor.getCurrentPosition();
-}
+    }
 
-public int getRotationPosition() {
+    public int getCurrentRotationPosition() {
         return liftMotor.getCurrentPosition();
-}
-public boolean isInDangerZone(){
-        if (extenderMotor.getCurrentPosition() > 50){ //TODO: Put in a real value
-        IS_IN_DANGER_ZONE = false;
+    }
+
+    public boolean isInDangerZone() {
+        return extenderMotor.getCurrentPosition() < 50; //TODO: Put in a real value
+    }
+
+    public boolean isClawOpen() {
+        return robotClaw.isOpen();
+    }
+    public double getCurrentWristPosition() {
+        return robotClaw.getWristPosition();
+    }
+
+    public boolean rotateWristRight() {
+        if (isInDangerZone()) {
+            return false;
+        } else {
+            robotClaw.toWristRight();
         }
-        else {IS_IN_DANGER_ZONE = true;}
-return IS_IN_DANGER_ZONE;
+        return true;
+    }
+
+    public boolean rotateWristLeft() {
+        if (isInDangerZone()) {
+            return false;
+        } else {
+            robotClaw.toWristLeft();
+        }
+        return true;
+    }
+
+    public void rotateWristCenter() {
+        robotClaw.toWristCenter();
+    }
+
+    public void openClaw() {
+        robotClaw.openClaw();
+    }
+
+    public void closeClaw() {
+        robotClaw.closeClaw();
+    }
+
+    public void raiseArm() {
+        rotateToPosition(ROTATE_MAX);
+    }
+
+    public void lowerArm() {
+        rotateToPosition(ROTATE_MIN);
+    }
+
+    public void extendArm() {
+        slideToPosition(EXTENSION_MAX);
+    }
+
+    public void retractArm() {
+        slideToPosition(EXTENSION_MIN);
     }
 }
