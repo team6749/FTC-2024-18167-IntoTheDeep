@@ -267,6 +267,16 @@ public class SampleMecanumDrive extends MecanumDrive {
         return wheelPositions;
     }
 
+    public List<Integer> getWheelTicks() {
+        lastEncPositions.clear();
+
+        for (DcMotorEx motor : motors) {
+            int position = motor.getCurrentPosition();
+            lastEncPositions.add(position);
+        }
+        return lastEncPositions;
+    }
+
     @Override
     public List<Double> getWheelVelocities() {
         lastEncVels.clear();
@@ -282,6 +292,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     @Override
     public void setMotorPowers(double v, double v1, double v2, double v3) {
+
         leftFront.setPower(v);
         leftRear.setPower(v1);
         rightRear.setPower(-1 * v2);

@@ -39,6 +39,10 @@ public class StraightTest extends LinearOpMode {
         telemetry.addData("finalX", poseEstimate.getX());
         telemetry.addData("finalY", poseEstimate.getY());
         telemetry.addData("finalHeading", poseEstimate.getHeading());
+        telemetry.addData("wheelVelocities",drive.getWheelVelocities());
+        telemetry.addData("wheelPositions",drive.getWheelPositions());
+        telemetry.addData("wheelTicks",drive.getWheelTicks());
+
         telemetry.update();
 
         while (!isStopRequested() && opModeIsActive()) ;
