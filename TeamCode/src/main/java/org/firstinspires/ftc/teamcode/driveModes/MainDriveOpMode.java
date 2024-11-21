@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.driveModes;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.hardware.RobotArm;
 import org.firstinspires.ftc.teamcode.hardware.RobotClaw;
@@ -15,36 +18,42 @@ public class MainDriveOpMode extends OpMode {
     RobotArm robotArm;
     boolean fastMode = true;
     double SLOW_MODE_STICK_DIVISOR = 3;
+    int loops = 0;
 
     @Override
     public void init() {
-        drive = new SampleMecanumDrive(hardwareMap);
         robotArm = new RobotArm(hardwareMap);
+        telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        drive = new SampleMecanumDrive(hardwareMap, telemetry);
+
+
     }
 
 
     @Override
     public void loop() {
+loops++;
+        telemetry.addData("loops", loops);
 
         driveCommands();
-        Pose2d poseEstimate = drive.getPoseEstimate();
-        telemetry.addData("x", poseEstimate.getX());
-        telemetry.addData("y", poseEstimate.getY());
-        telemetry.addData("heading", poseEstimate.getHeading());
-
-        if (gamepad1.a || gamepad1.x) {
-            automationCommands();
-        } else {
-            armCommands();
-            telemetry.addData("arm angle", robotArm.getCurrentRotationPosition());
-            telemetry.addData("arm extension", robotArm.getCurrentExtensionPosition());
-
-            wristCommands();
-            telemetry.addData("wrist position", robotArm.getCurrentWristPosition());
-
-            clawCommands();
-            telemetry.addData("claw position", robotArm.isClawOpen() ? "OPEN" : "CLOSED");
-        }
+//        Pose2d poseEstimate = drive.getPoseEstimate();
+//        telemetry.addData("x", poseEstimate.getX());
+//        telemetry.addData("y", poseEstimate.getY());
+//        telemetry.addData("heading", poseEstimate.getHeading());
+//
+//        if (gamepad1.a || gamepad1.x) {
+//            automationCommands();
+//        } else {
+//            armCommands();
+//            telemetry.addData("arm angle", robotArm.getCurrentRotationPosition());
+//            telemetry.addData("arm extension", robotArm.getCurrentExtensionPosition());
+//
+//            wristCommands();
+//            telemetry.addData("wrist position", robotArm.getCurrentWristPosition());
+//
+//            clawCommands();
+//            telemetry.addData("claw position", robotArm.isClawOpen() ? "OPEN" : "CLOSED");
+//        }
 
     }
 
@@ -115,6 +124,12 @@ public class MainDriveOpMode extends OpMode {
                     -gamepad1.right_stick_x / SLOW_MODE_STICK_DIVISOR
             );
         }
+        telemetry.addData("fastSlow", fastMode ? "fast" : "SLOW");
+        telemetry.addData("stickX", gamepad1.left_stick_x);
+        telemetry.addData("stickY", gamepad1.left_stick_y);
+        telemetry.addData("weightedX", weightedStickPose.getX());
+        telemetry.addData("weightedY", weightedStickPose.getY());
+
         drive.setWeightedDrivePower(weightedStickPose);
         drive.update();
     }
