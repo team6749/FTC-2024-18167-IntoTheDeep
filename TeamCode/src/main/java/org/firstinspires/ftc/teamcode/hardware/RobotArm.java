@@ -23,13 +23,17 @@ public class RobotArm {
     public static int POSITION_TOLERANCE_EXTENDER = 5;
 
     public static int ROTATE_MIN = 0;
-    public static int ROTATE_DRIVE = 10;
-    public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
-    public static int ROTATE_HIGH_BASKET = (int) (LIFT_COUNTS_PER_REVOLUTION * 28 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
-    public static int ROTATE_MAX = (int) (LIFT_COUNTS_PER_REVOLUTION * 28 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_DRIVE = -10;
+    public static int ROTATE_LOW_BASKET = -50; //TODO - put in a real value
+    public static int ROTATE_HIGH_BASKET = -1* (int) (LIFT_COUNTS_PER_REVOLUTION * 28 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_MAX = -1* (int) (LIFT_COUNTS_PER_REVOLUTION * 28 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
 
     public static int POSITION_TOLERANCE_LIFT = 10;
     public static int BASE_ANGLE = 5;
+
+    private int currentRotationDesiredPosition = ROTATE_MIN;
+    private int currentExtensionDesiredPosition = EXTENSION_MIN;
+
 
     RobotClaw robotClaw;
 
@@ -71,14 +75,19 @@ public class RobotArm {
 
 
     public void rotateToPosition(int desiredPosition) {
+        currentRotationDesiredPosition = desiredPosition;
         liftMotor.setTargetPosition(desiredPosition);
-        if (isAtRotation(desiredPosition)) {
+        doRotation();
+    }
+
+    private void doRotation() {
+        if (isAtRotation(currentRotationDesiredPosition)) {
             liftMotor.setPower(0);
         } else {
-            if (liftMotor.getCurrentPosition() <= desiredPosition) {
-                liftMotor.setPower(0.05);
+            if (liftMotor.getCurrentPosition() <= currentRotationDesiredPosition) {
+                liftMotor.setPower(0.15);
             } else {
-                liftMotor.setPower(-0.05);
+                liftMotor.setPower(-0.15);
             }
         }
     }
@@ -220,5 +229,9 @@ public class RobotArm {
 
     public void retractArm() {
         slideToPosition(EXTENSION_MIN);
+    }
+
+    public void continueRotating() {
+        doRotation();
     }
 }

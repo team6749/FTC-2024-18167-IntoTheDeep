@@ -36,24 +36,24 @@ loops++;
         telemetry.addData("loops", loops);
 
         driveCommands();
-//        Pose2d poseEstimate = drive.getPoseEstimate();
-//        telemetry.addData("x", poseEstimate.getX());
-//        telemetry.addData("y", poseEstimate.getY());
-//        telemetry.addData("heading", poseEstimate.getHeading());
-//
-//        if (gamepad1.a || gamepad1.x) {
-//            automationCommands();
-//        } else {
-//            armCommands();
-//            telemetry.addData("arm angle", robotArm.getCurrentRotationPosition());
-//            telemetry.addData("arm extension", robotArm.getCurrentExtensionPosition());
-//
-//            wristCommands();
-//            telemetry.addData("wrist position", robotArm.getCurrentWristPosition());
-//
-//            clawCommands();
-//            telemetry.addData("claw position", robotArm.isClawOpen() ? "OPEN" : "CLOSED");
-//        }
+        Pose2d poseEstimate = drive.getPoseEstimate();
+        telemetry.addData("x", poseEstimate.getX());
+        telemetry.addData("y", poseEstimate.getY());
+        telemetry.addData("heading", poseEstimate.getHeading());
+
+        if (gamepad1.a || gamepad1.x) {
+            automationCommands();
+        } else {
+            armCommands();
+            telemetry.addData("arm angle", robotArm.getCurrentRotationPosition());
+            telemetry.addData("arm extension", robotArm.getCurrentExtensionPosition());
+
+            wristCommands();
+            telemetry.addData("wrist position", robotArm.getCurrentWristPosition());
+
+            clawCommands();
+            telemetry.addData("claw position", robotArm.isClawOpen() ? "OPEN" : "CLOSED");
+        }
 
     }
 
@@ -70,6 +70,8 @@ loops++;
                 robotArm.raiseArm();
             } else if (gamepad1.dpad_down) {
                 robotArm.lowerArm();
+            } else {
+                robotArm.continueRotating();
             }
 
             if (gamepad1.right_bumper) {
