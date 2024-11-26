@@ -78,6 +78,8 @@ loops++;
                 robotArm.extendArm();
             } else if (gamepad1.left_bumper) {
                 robotArm.retractArm();
+            } else {
+                robotArm.continueExtension();
             }
 
     }

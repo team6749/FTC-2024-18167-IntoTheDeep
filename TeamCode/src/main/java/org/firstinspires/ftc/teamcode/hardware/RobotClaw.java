@@ -32,7 +32,7 @@ public class RobotClaw {
     }
 
     public void toWristLeft() {
-    wristServo.setPosition(0.25); //DO NOT SET to 0 because it hits other things
+    wristServo.setPosition(0.75); //DO NOT SET to 0 because it hits other things
     }
 
     public void toWristCenter() {
@@ -40,7 +40,7 @@ public class RobotClaw {
     }
 
     public void toWristRight() {
-    wristServo.setPosition(1);
+    wristServo.setPosition(.25);
     }
     public double getWristPosition() {
         return wristServo.getPosition();
