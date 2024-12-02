@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class RobotArm {
@@ -13,44 +15,63 @@ public class RobotArm {
     static final double COUNTS_PER_REVOLUTION = 384.5;
     static final int LIFT_COUNTS_PER_REVOLUTION = 28;// # Adjust this for the specific motor encoder counts per revolution
     static final int GEAR_RATIO = 80;
-    static final int CHAIN_RATIO = 40/20;
+    static final int CHAIN_RATIO = 40 / 20;
     static final double HIGH_BASKET_ANGLE_RATIO = 0.175;
-    public static int EXTENSION_BASE = 5; //TODO - put in a real value
-
+    public static int EXTENSION_MIN = 0; //TODO - put in a real value
+    public static int EXTENSION_DRIVE = (int) (1 * COUNTS_PER_REVOLUTION);
+    public static int EXTENSION_MAX = (int) (8.5 * COUNTS_PER_REVOLUTION); //TODO - put in a real value
     public static int EXTENSION_LOW_BASKET = 20; //TODO - put in a real value
-    public static int EXTENSION_HIGH_BASKET = (int) (1 * COUNTS_PER_REVOLUTION); //43 in out //TODO - put in a real value
+    public static int EXTENSION_HIGH_BASKET = (int) (7.5 * COUNTS_PER_REVOLUTION); //43 in out //TODO - put in a real value
     public static int POSITION_TOLERANCE_EXTENDER = 5;
-
-    public static int ROTATE_BASE = 0;
+    public static int EXTEND_INTERVAL = 100;
+    private static double EXTENDER_POWER_MAX = 0.8;
+    public static int WRIST_DANGER_ZONE = 600;
+    public static int ROTATE_MIN = 0;
+    public static int ROTATE_DRIVE = 10;
     public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
-    public static int ROTATE_HIGH_BASKET = (int) (LIFT_COUNTS_PER_REVOLUTION * 28 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
-    public static int POSITION_TOLERANCE_LIFT = 10;
+    public static int ROTATE_HIGH_BASKET = (int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    //ORIG 28
+    public static int ROTATE_MAX = (int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_INTERVAL = 50;
+    private static double EXTENDED_POWER_LIMIT = 1.0;
+    private static double RETRACTED_POWER_LIMIT = 0.35;
+    private final PIDController liftPID;
+
+
+    public static int POSITION_TOLERANCE_LIFT = 25;
     public static int BASE_ANGLE = 5;
-    public boolean IS_IN_DANGER_ZONE = true;
+
+    private int currentRotationDesiredPosition = ROTATE_MIN;
+    private int currentExtensionDesiredPosition = EXTENSION_MIN;
+
+
+    RobotClaw robotClaw;
+
     public RobotArm(HardwareMap hwMap) {
         extenderMotor = new Motor(hwMap, "extender_motor", Motor.GoBILDA.RPM_435);
         extenderMotor.setRunMode(Motor.RunMode.PositionControl);
-        extenderMotor.resetEncoder();
+        extenderMotor.stopAndResetEncoder();
         extenderMotor.setInverted(true);
         //verticalMotor.setTargetPosition(0);
         extenderMotor.setPositionTolerance(POSITION_TOLERANCE_EXTENDER);
         extenderMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         extenderMotor.set(0);
 
-        // Set the motor to run using encoders
-//        verticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         liftMotor = hwMap.get(DcMotorEx.class, "lift_motor");
         liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        liftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         liftMotor.setTargetPositionTolerance(POSITION_TOLERANCE_LIFT);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftMotor.setPower(0);
 
+        // Configure the PID controller
+        liftPID = new PIDController(0.1, 0.0, 0.0);
+        liftPID.setTolerance(POSITION_TOLERANCE_LIFT);
+
+        robotClaw = new RobotClaw(hwMap);
     }
-
-
-
 
 
     public void rotateToHighBasket() {
@@ -62,62 +83,112 @@ public class RobotArm {
     }
 
     public void rotateToBase() {
-        rotateToPosition(ROTATE_BASE);
+        rotateToPosition(ROTATE_MIN);
     }
 
 
-
-    public void rotateToPosition(int desiredPosition){
-        liftMotor.setTargetPosition(desiredPosition);
-        if (liftMotorAtSetPoint(desiredPosition)) {
+    public void rotateToPosition(int desiredPosition) {
+        if (ROTATE_MIN <= desiredPosition &&
+                desiredPosition <= ROTATE_MAX) {
+            currentRotationDesiredPosition = desiredPosition;
+            liftMotor.setTargetPosition(desiredPosition);
+            doRotation();
+        } else {
             liftMotor.setPower(0);
         }
-        else{
-            if (liftMotor.getCurrentPosition() <= desiredPosition){
-                liftMotor.setPower(0.05);
-            }else {
+    }
+
+    private void doRotation() {
+        if (isAtRotation(currentRotationDesiredPosition)) {
+            liftMotor.setPower(0);
+        } else {
+            if (liftMotor.getCurrentPosition() <= currentRotationDesiredPosition) {
+                // Get the PID output
+                double pidOutput = liftPID.calculate(liftMotor.getCurrentPosition(), currentRotationDesiredPosition);
+
+                // Determine the power limit based on the extension
+                double powerLimit = ((double)(getCurrentExtensionPosition()/EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+
+                // Scale PID output to the power limit
+                double adjustedPower = Math.max(-powerLimit, Math.min(pidOutput, powerLimit));
+                liftMotor.setPower(adjustedPower);
+            } else {
                 liftMotor.setPower(-0.05);
             }
         }
+
+
     }
 
-    public boolean liftMotorAtSetPoint(int desiredPosition) {
-        return Math.abs(liftMotor.getCurrentPosition()-desiredPosition) < POSITION_TOLERANCE_LIFT;
+    public boolean isAtRotation(int desiredPosition) {
+        return Math.abs(liftMotor.getCurrentPosition() - desiredPosition) < POSITION_TOLERANCE_LIFT;
     }
 
-    public void slideToPosition(int desiredPosition, float triggerPressure) {
 
+    public void slideToPosition(int desiredPosition) {
+        if (EXTENSION_MIN <= desiredPosition &&
+                desiredPosition <= EXTENSION_MAX) {
             extenderMotor.setTargetPosition(desiredPosition);
-            if (extenderMotor.atTargetPosition()) {
-                extenderMotor.set(0);
-            } else {
-                extenderMotor.setPositionCoefficient(0.005);
-                extenderMotor.set(1);
-            }
+        }
+        doExtension();
 
     }
 
-    public void toHighBasket(float triggerPressure) {
-        slideToPosition(EXTENSION_HIGH_BASKET, triggerPressure);
+    private void doExtension() {
+        if (extenderMotor.atTargetPosition()) {
+            extenderMotor.set(0);
+        } else {
+            extenderMotor.setPositionCoefficient(0.005);
+            extenderMotor.set(EXTENDER_POWER_MAX);
+        }
+    }
+
+    private boolean isArmLow() {
+        return liftMotor.getCurrentPosition() < (ROTATE_DRIVE - POSITION_TOLERANCE_LIFT);
+    }
+
+    private boolean isAtDriveRotation() {
+        return isAtRotation(ROTATE_DRIVE);
+    }
+
+    private boolean isAtDriveExtension() {
+        return isExtenderAtPosition(EXTENSION_DRIVE);
+    }
+
+    public void driveMode() {
+        //If the arm is low, get the arm up first, then retract
+
+        if (isArmLow()) {
+            rotateToPosition(ROTATE_DRIVE);
+            if (isAtDriveRotation()) {
+                slideToPosition(EXTENSION_DRIVE);
+            }
+        } else {
+            slideToPosition(EXTENSION_DRIVE);
+            if (isAtDriveExtension()) {
+                rotateToPosition(ROTATE_DRIVE);
+            }
+        }
+    }
+
+    public void toHighBasket() {
+        slideToPosition(EXTENSION_HIGH_BASKET);
         rotateToHighBasket();
     }
 
-    public void toLowBasket(float triggerPressure) {
-        slideToPosition(EXTENSION_LOW_BASKET, triggerPressure);
+    public void toLowBasket() {
+        slideToPosition(EXTENSION_LOW_BASKET);
     }
 
-    public void toBasePosition(float triggerPressure) {
-        slideToPosition(EXTENSION_BASE, triggerPressure);
-        rotateToBase();
-    }
 
-    public boolean isAtBasePosition() {
-        return isExtenderAtPosition(EXTENSION_BASE);
+    public boolean isFullyRetracted() {
+        return isExtenderAtPosition(EXTENSION_MIN);
     }
 
     public boolean isAtLowBasketPosition() {
         return isExtenderAtPosition(EXTENSION_LOW_BASKET);
     }
+
     public boolean isAtHighBasketPosition() {
         return isExtenderAtPosition(EXTENSION_HIGH_BASKET);
     }
@@ -131,18 +202,77 @@ public class RobotArm {
         liftMotor.setPower(0);
     }
 
-public int getExtensionPosition(){
+    public int getCurrentExtensionPosition() {
         return extenderMotor.getCurrentPosition();
-}
+    }
 
-public int getRotationPosition() {
+    public int getCurrentRotationPosition() {
         return liftMotor.getCurrentPosition();
-}
-public boolean isInDangerZone(){
-        if (extenderMotor.getCurrentPosition() > 50){ //TODO: Put in a real value
-        IS_IN_DANGER_ZONE = false;
+    }
+
+    public boolean isInDangerZone() {
+        return extenderMotor.getCurrentPosition() < WRIST_DANGER_ZONE;
+    }
+
+    public boolean isClawOpen() {
+        return robotClaw.isOpen();
+    }
+
+    public double getCurrentWristPosition() {
+        return robotClaw.getWristPosition();
+    }
+
+    public boolean rotateWristRight() {
+        if (isInDangerZone()) {
+            return false;
+        } else {
+            robotClaw.toWristRight();
         }
-        else {IS_IN_DANGER_ZONE = true;}
-return IS_IN_DANGER_ZONE;
+        return true;
+    }
+
+    public boolean rotateWristLeft() {
+        if (isInDangerZone()) {
+            return false;
+        } else {
+            robotClaw.toWristLeft();
+        }
+        return true;
+    }
+
+    public void rotateWristCenter() {
+        robotClaw.toWristCenter();
+    }
+
+    public void openClaw() {
+        robotClaw.openClaw();
+    }
+
+    public void closeClaw() {
+        robotClaw.closeClaw();
+    }
+
+    public void raiseArm() {
+        rotateToPosition(Math.min(getCurrentRotationPosition() + ROTATE_INTERVAL, ROTATE_MAX));
+    }
+
+    public void lowerArm() {
+        rotateToPosition(Math.max(getCurrentRotationPosition() - ROTATE_INTERVAL, ROTATE_MIN));
+    }
+
+    public void extendArm() {
+        slideToPosition(Math.min(getCurrentExtensionPosition() + EXTEND_INTERVAL, EXTENSION_MAX));
+    }
+
+    public void retractArm() {
+        slideToPosition(Math.max(getCurrentExtensionPosition() - EXTEND_INTERVAL, EXTENSION_MIN));
+    }
+
+    public void continueRotating() {
+        doRotation();
+    }
+
+    public void continueExtension() {
+        doExtension();
     }
 }

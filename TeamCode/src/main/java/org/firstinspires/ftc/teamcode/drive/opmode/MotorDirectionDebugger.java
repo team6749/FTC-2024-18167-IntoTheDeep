@@ -38,17 +38,17 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  *
  * Uncomment the @Disabled tag below to use this opmode.
  */
-@Disabled
+//@Disabled
 @Config
 @TeleOp(group = "drive")
 public class MotorDirectionDebugger extends LinearOpMode {
-    public static double MOTOR_POWER = 0.7;
+    public static double MOTOR_POWER = 1.0;
 
     @Override
     public void runOpMode() throws InterruptedException {
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap, telemetry);
 
         telemetry.addLine("Press play to begin the debugging opmode");
         telemetry.update();
@@ -69,20 +69,29 @@ public class MotorDirectionDebugger extends LinearOpMode {
             telemetry.addLine("<font face=\"monospace\">&nbsp;&nbsp;B / O&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Rear&nbsp;&nbsp;Right</font>");
             telemetry.addLine("<font face=\"monospace\">&nbsp;&nbsp;A / X&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Rear&nbsp;&nbsp;Left</font>");
             telemetry.addLine();
-
+boolean atLeastOneMotor = false;
             if(gamepad1.x) {
                 drive.setMotorPowers(MOTOR_POWER, 0, 0, 0);
                 telemetry.addLine("Running Motor: Front Left");
-            } else if(gamepad1.y) {
+                atLeastOneMotor = true;
+            }  if(gamepad1.y) {
                 drive.setMotorPowers(0, 0, 0, MOTOR_POWER);
                 telemetry.addLine("Running Motor: Front Right");
-            } else if(gamepad1.b) {
+                atLeastOneMotor = true;
+
+            }  if(gamepad1.b) {
                 drive.setMotorPowers(0, 0, MOTOR_POWER, 0);
                 telemetry.addLine("Running Motor: Rear Right");
-            } else if(gamepad1.a) {
+                atLeastOneMotor = true;
+
+            }  if(gamepad1.a) {
                 drive.setMotorPowers(0, MOTOR_POWER, 0, 0);
                 telemetry.addLine("Running Motor: Rear Left");
-            } else {
+                atLeastOneMotor = true;
+
+            }
+
+            if (!atLeastOneMotor) {
                 drive.setMotorPowers(0, 0, 0, 0);
                 telemetry.addLine("Running Motor: None");
             }

@@ -11,31 +11,28 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
+import java.util.List;
+
 /*
  * This is a simple routine to test translational drive capabilities.
  */
 @Config
 @Autonomous(group = "drive")
-public class StraightTest extends LinearOpMode {
-    public static double DISTANCE = 1; // in
+public class OdometryTest extends LinearOpMode {
+    public static double DISTANCE = 9.42; // in
+    public Pose2d idealpose = new Pose2d(0.5,0);
 
     @Override
     public void runOpMode() throws InterruptedException {
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap, telemetry);
-
-        Trajectory trajectory = drive.trajectoryBuilder(new Pose2d())
-                .forward(DISTANCE)
-                .build();
-
         waitForStart();
-        telemetry.addData("targetPose",trajectory.getPath().getSegments().get(0));
-        if (isStopRequested()) return;
-
-        drive.followTrajectory(trajectory);
+        drive.setDrivePower(idealpose);
+        List<Integer> ticks = drive.getWheelTicks();
 
         Pose2d poseEstimate = drive.getPoseEstimate();
+        telemetry.addData("encoderTicks",ticks);
         telemetry.addData("finalX", poseEstimate.getX());
         telemetry.addData("finalY", poseEstimate.getY());
         telemetry.addData("finalHeading", poseEstimate.getHeading());

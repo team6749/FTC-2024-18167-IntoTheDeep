@@ -26,11 +26,13 @@ public class RobotClaw {
     }
 
     public boolean isOpen() {
-        return true; //TODO actually check
+        //If the servers are close to the fully extended position, count as open
+        return (leftClawServo.getPosition() < .2 ||
+                rightClawServo.getPosition() > .8);
     }
 
     public void toWristLeft() {
-    wristServo.setPosition(0);
+    wristServo.setPosition(0.75); //DO NOT SET to 0 because it hits other things
     }
 
     public void toWristCenter() {
@@ -38,9 +40,9 @@ public class RobotClaw {
     }
 
     public void toWristRight() {
-    wristServo.setPosition(1);
+    wristServo.setPosition(.25);
     }
-    private void turnWrist() {
-
+    public double getWristPosition() {
+        return wristServo.getPosition();
     }
 }
