@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -18,18 +19,24 @@ public class RobotArm {
     static final double HIGH_BASKET_ANGLE_RATIO = 0.175;
     public static int EXTENSION_MIN = 0; //TODO - put in a real value
     public static int EXTENSION_DRIVE = (int) (1 * COUNTS_PER_REVOLUTION);
-    public static int EXTENSION_MAX = (int) (8 * COUNTS_PER_REVOLUTION); //TODO - put in a real value
+    public static int EXTENSION_MAX = (int) (8.5 * COUNTS_PER_REVOLUTION); //TODO - put in a real value
     public static int EXTENSION_LOW_BASKET = 20; //TODO - put in a real value
     public static int EXTENSION_HIGH_BASKET = (int) (7.5 * COUNTS_PER_REVOLUTION); //43 in out //TODO - put in a real value
     public static int POSITION_TOLERANCE_EXTENDER = 5;
     public static int EXTEND_INTERVAL = 100;
+    private static double EXTENDER_POWER_MAX = 0.8;
     public static int WRIST_DANGER_ZONE = 600;
     public static int ROTATE_MIN = 0;
     public static int ROTATE_DRIVE = 10;
     public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
-    public static int ROTATE_HIGH_BASKET = (int) (LIFT_COUNTS_PER_REVOLUTION * 29 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
-    public static int ROTATE_MAX = (int) (LIFT_COUNTS_PER_REVOLUTION * 29 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_HIGH_BASKET = (int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    //ORIG 28
+    public static int ROTATE_MAX = (int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     public static int ROTATE_INTERVAL = 50;
+    private static double EXTENDED_POWER_LIMIT = 1.0;
+    private static double RETRACTED_POWER_LIMIT = 0.35;
+    private final PIDController liftPID;
+
 
     public static int POSITION_TOLERANCE_LIFT = 25;
     public static int BASE_ANGLE = 5;
@@ -58,6 +65,10 @@ public class RobotArm {
         liftMotor.setTargetPositionTolerance(POSITION_TOLERANCE_LIFT);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftMotor.setPower(0);
+
+        // Configure the PID controller
+        liftPID = new PIDController(0.1, 0.0, 0.0);
+        liftPID.setTolerance(POSITION_TOLERANCE_LIFT);
 
         robotClaw = new RobotClaw(hwMap);
     }
@@ -92,11 +103,21 @@ public class RobotArm {
             liftMotor.setPower(0);
         } else {
             if (liftMotor.getCurrentPosition() <= currentRotationDesiredPosition) {
-                liftMotor.setPower(0.35);
+                // Get the PID output
+                double pidOutput = liftPID.calculate(liftMotor.getCurrentPosition(), currentRotationDesiredPosition);
+
+                // Determine the power limit based on the extension
+                double powerLimit = ((double)(getCurrentExtensionPosition()/EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+
+                // Scale PID output to the power limit
+                double adjustedPower = Math.max(-powerLimit, Math.min(pidOutput, powerLimit));
+                liftMotor.setPower(adjustedPower);
             } else {
                 liftMotor.setPower(-0.05);
             }
         }
+
+
     }
 
     public boolean isAtRotation(int desiredPosition) {
@@ -118,7 +139,7 @@ public class RobotArm {
             extenderMotor.set(0);
         } else {
             extenderMotor.setPositionCoefficient(0.005);
-            extenderMotor.set(.8);
+            extenderMotor.set(EXTENDER_POWER_MAX);
         }
     }
 

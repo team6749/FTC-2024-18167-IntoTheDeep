@@ -18,6 +18,10 @@ public class MainDriveOpMode extends OpMode {
     RobotArm robotArm;
     boolean fastMode = true;
     double SLOW_MODE_STICK_DIVISOR = 3;
+    private boolean backButtonPressedLast = false; // Tracks the previous state of the back button
+
+    private long lastToggleTime = 0;
+    private static final long DEBOUNCE_DELAY_MS = 200;
     int loops = 0;
 
     @Override
@@ -82,6 +86,7 @@ loops++;
                 robotArm.continueExtension();
             }
 
+
     }
 
     private void wristCommands() {
@@ -111,9 +116,17 @@ loops++;
     }
 
     private void driveCommands() {
-        if (gamepad1.back) {
-            fastMode = !fastMode;
+        long currentTime = System.currentTimeMillis();
+        boolean backButtonPressedNow = gamepad1.back;
+        if (backButtonPressedNow && !backButtonPressedLast) {
+            if (currentTime - lastToggleTime > DEBOUNCE_DELAY_MS) {
+                fastMode = !fastMode;
+                lastToggleTime = currentTime;
+            }
         }
+        // Update the last state to the current state
+        backButtonPressedLast = backButtonPressedNow;
+
         Pose2d weightedStickPose;
         if (fastMode) {
             weightedStickPose = new Pose2d(
