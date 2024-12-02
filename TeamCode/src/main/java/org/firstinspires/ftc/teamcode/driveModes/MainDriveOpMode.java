@@ -51,6 +51,10 @@ loops++;
             armCommands();
             telemetry.addData("arm angle", robotArm.getCurrentRotationPosition());
             telemetry.addData("arm extension", robotArm.getCurrentExtensionPosition());
+            telemetry.addData("liftMotor desired position", robotArm.getRotationDesiredPosition());
+            telemetry.addData("liftMotor power", robotArm.getLiftMotorPower());
+            telemetry.addData("LiftPIDOutput",robotArm.getPIDOutput());
+            telemetry.addData("LiftPowerLimit", robotArm.getLiftPowerLimit());
 
             wristCommands();
             telemetry.addData("wrist position", robotArm.getCurrentWristPosition());

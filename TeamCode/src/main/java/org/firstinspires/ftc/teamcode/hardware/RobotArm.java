@@ -29,9 +29,9 @@ public class RobotArm {
     public static int ROTATE_MIN = 0;
     public static int ROTATE_DRIVE = 10;
     public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
-    public static int ROTATE_HIGH_BASKET = (int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_HIGH_BASKET = 620;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     //ORIG 28
-    public static int ROTATE_MAX = (int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_MAX = 620;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     public static int ROTATE_INTERVAL = 50;
     private static double EXTENDED_POWER_LIMIT = 1.0;
     private static double RETRACTED_POWER_LIMIT = 0.35;
@@ -67,7 +67,7 @@ public class RobotArm {
         liftMotor.setPower(0);
 
         // Configure the PID controller
-        liftPID = new PIDController(0.1, 0.0, 0.0);
+        liftPID = new PIDController(0.1, 0.05, 0.0);
         liftPID.setTolerance(POSITION_TOLERANCE_LIFT);
 
         robotClaw = new RobotClaw(hwMap);
@@ -107,7 +107,15 @@ public class RobotArm {
                 double pidOutput = liftPID.calculate(liftMotor.getCurrentPosition(), currentRotationDesiredPosition);
 
                 // Determine the power limit based on the extension
-                double powerLimit = ((double)(getCurrentExtensionPosition()/EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+                //double powerLimit = ((double)(getCurrentExtensionPosition()/EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+                double powerLimit;
+                if (getCurrentExtensionPosition() < EXTENSION_MAX * 0.8) {
+                    powerLimit = ((double)(getCurrentExtensionPosition() / EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+                } else {
+                    // Increase the power limit gradually as the arm extends further
+                    powerLimit = Math.min(EXTENDED_POWER_LIMIT, EXTENDED_POWER_LIMIT + (getCurrentExtensionPosition() - EXTENSION_MAX * 0.8) * 2);
+                }
+
 
                 // Scale PID output to the power limit
                 double adjustedPower = Math.max(-powerLimit, Math.min(pidOutput, powerLimit));
@@ -210,6 +218,18 @@ public class RobotArm {
         return liftMotor.getCurrentPosition();
     }
 
+    public int getRotationDesiredPosition(){
+        return currentRotationDesiredPosition;
+    }
+    public double getPIDOutput() {
+        return liftPID.calculate(liftMotor.getCurrentPosition(),currentRotationDesiredPosition);
+    }
+    public double getLiftMotorPower(){
+        return liftMotor.getPower();
+    }
+    public  double getLiftPowerLimit() {
+        return ((double)(getCurrentExtensionPosition()/EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+    }
     public boolean isInDangerZone() {
         return extenderMotor.getCurrentPosition() < WRIST_DANGER_ZONE;
     }
