@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.driveModes;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -133,11 +134,16 @@ loops++;
 
         Pose2d weightedStickPose;
         if (fastMode) {
-            weightedStickPose = new Pose2d(
+            Vector2d input = new Vector2d(
                     -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x
-            );
+                    gamepad1.left_stick_x
+            ).rotated(-drive.getPoseEstimate().getHeading());
+            weightedStickPose = new Pose2d(input.getX(), input.getY(), -gamepad1.right_stick_x);
+//            weightedStickPose = new Pose2d(
+//                    -gamepad1.left_stick_y,
+//                    -gamepad1.left_stick_x,
+//                    -gamepad1.right_stick_x
+//            );
         } else {
             weightedStickPose = new Pose2d(
                     -gamepad1.left_stick_y / SLOW_MODE_STICK_DIVISOR,
