@@ -15,7 +15,7 @@ public class RobotArm {
     static final double COUNTS_PER_REVOLUTION = 384.5;
     static final int LIFT_COUNTS_PER_REVOLUTION = 28;// # Adjust this for the specific motor encoder counts per revolution
     static final int GEAR_RATIO = 80;
-    static final int CHAIN_RATIO = 40 / 20;
+    static final int CHAIN_RATIO = 40 / 15; //small gear is 15, large gear is 40
     static final double HIGH_BASKET_ANGLE_RATIO = 0.175;
     public static int EXTENSION_MIN = 0; //TODO - put in a real value
     public static int EXTENSION_DRIVE = (int) (1 * COUNTS_PER_REVOLUTION);
@@ -24,15 +24,16 @@ public class RobotArm {
     public static int EXTENSION_HIGH_BASKET = (int) (7.5 * COUNTS_PER_REVOLUTION); //43 in out //TODO - put in a real value
     public static int POSITION_TOLERANCE_EXTENDER = 5;
     public static int EXTEND_INTERVAL = 100;
-    private static double EXTENDER_POWER_MAX = 0.8;
+    private static double EXTENDER_POWER_MAX = 1.2;
     public static int WRIST_DANGER_ZONE = 600;
     public static int ROTATE_MIN = 0;
     public static int ROTATE_DRIVE = 10;
     public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
-    public static int ROTATE_HIGH_BASKET = 620;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_HIGH_BASKET = 970;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     //ORIG 28
-    public static int ROTATE_MAX = 620;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_MAX = 970;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     public static int ROTATE_INTERVAL = 50;
+    public static double MAX_DOWN_POWER = 0.3;
     private static double EXTENDED_POWER_LIMIT = 1.0;
     private static double RETRACTED_POWER_LIMIT = 0.35;
     private final PIDController liftPID;
@@ -67,7 +68,7 @@ public class RobotArm {
         liftMotor.setPower(0);
 
         // Configure the PID controller
-        liftPID = new PIDController(0.1, 0.05, 0.0);
+        liftPID = new PIDController(0.1, 0.15, 0.0);
         liftPID.setTolerance(POSITION_TOLERANCE_LIFT);
 
         robotClaw = new RobotClaw(hwMap);
@@ -109,11 +110,11 @@ public class RobotArm {
                 // Determine the power limit based on the extension
                 //double powerLimit = ((double)(getCurrentExtensionPosition()/EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
                 double powerLimit;
-                if (getCurrentExtensionPosition() < EXTENSION_MAX * 0.8) {
-                    powerLimit = ((double)(getCurrentExtensionPosition() / EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+                if (getCurrentExtensionPosition() < EXTENSION_MAX * 0.6) {
+                    powerLimit = ((double)(getCurrentExtensionPosition() / EXTENSION_MAX) * 2 * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
                 } else {
                     // Increase the power limit gradually as the arm extends further
-                    powerLimit = Math.min(EXTENDED_POWER_LIMIT, EXTENDED_POWER_LIMIT + (getCurrentExtensionPosition() - EXTENSION_MAX * 0.8) * 2);
+                    powerLimit = Math.min(EXTENDED_POWER_LIMIT, EXTENDED_POWER_LIMIT + (getCurrentExtensionPosition() - EXTENSION_MAX * 0.6) * 4);
                 }
 
 
@@ -121,7 +122,7 @@ public class RobotArm {
                 double adjustedPower = Math.max(-powerLimit, Math.min(pidOutput, powerLimit));
                 liftMotor.setPower(adjustedPower);
             } else {
-                liftMotor.setPower(-0.05);
+                liftMotor.setPower(-MAX_DOWN_POWER);
             }
         }
 
@@ -146,7 +147,7 @@ public class RobotArm {
         if (extenderMotor.atTargetPosition()) {
             extenderMotor.set(0);
         } else {
-            extenderMotor.setPositionCoefficient(0.005);
+            extenderMotor.setPositionCoefficient(0.01);
             extenderMotor.set(EXTENDER_POWER_MAX);
         }
     }
