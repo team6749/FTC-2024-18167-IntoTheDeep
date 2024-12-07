@@ -13,7 +13,6 @@ import org.firstinspires.ftc.teamcode.hardware.RobotArm;
 import org.firstinspires.ftc.teamcode.hardware.RobotClaw;
 import org.firstinspires.ftc.teamcode.subsystems.CraneSystem;
 
-@TeleOp(name="MAIN", group="Iterative OpMode")
 public class MainDriveOpMode extends OpMode {
     SampleMecanumDrive drive;
     RobotArm robotArm;
@@ -24,14 +23,17 @@ public class MainDriveOpMode extends OpMode {
     private long lastToggleTime = 0;
     private static final long DEBOUNCE_DELAY_MS = 200;
     int loops = 0;
+    boolean isBlueAlliance = true;
+
+    public MainDriveOpMode(boolean isBlueAlliance) {
+        this.isBlueAlliance = isBlueAlliance;
+    }
 
     @Override
     public void init() {
         robotArm = new RobotArm(hardwareMap);
         telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
         drive = new SampleMecanumDrive(hardwareMap, telemetry);
-
-
     }
 
 
@@ -133,10 +135,11 @@ loops++;
         backButtonPressedLast = backButtonPressedNow;
 
         Pose2d weightedStickPose;
+        int allianceFlip = isBlueAlliance?1:-1;
         if (fastMode) {
             Vector2d input = new Vector2d(
                     -gamepad1.left_stick_y,
-                    gamepad1.left_stick_x
+                    -gamepad1.left_stick_x
             ).rotated(-drive.getPoseEstimate().getHeading());
             weightedStickPose = new Pose2d(input.getX(), input.getY(), -gamepad1.right_stick_x);
 //            weightedStickPose = new Pose2d(

@@ -68,7 +68,7 @@ public class RobotArm {
         liftMotor.setPower(0);
 
         // Configure the PID controller
-        liftPID = new PIDController(0.1, 0.15, 0.0);
+        liftPID = new PIDController(0.15, 0.1, 0.0);
         liftPID.setTolerance(POSITION_TOLERANCE_LIFT);
 
         robotClaw = new RobotClaw(hwMap);
@@ -109,13 +109,13 @@ public class RobotArm {
 
                 // Determine the power limit based on the extension
                 //double powerLimit = ((double)(getCurrentExtensionPosition()/EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
-                double powerLimit;
-                if (getCurrentExtensionPosition() < EXTENSION_MAX * 0.6) {
-                    powerLimit = ((double)(getCurrentExtensionPosition() / EXTENSION_MAX) * 2 * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
-                } else {
-                    // Increase the power limit gradually as the arm extends further
-                    powerLimit = Math.min(EXTENDED_POWER_LIMIT, EXTENDED_POWER_LIMIT + (getCurrentExtensionPosition() - EXTENSION_MAX * 0.6) * 4);
-                }
+                double powerLimit = 1;
+//                if (getCurrentExtensionPosition() < EXTENSION_MAX * 0.5) {
+//                    powerLimit = ((double)(getCurrentExtensionPosition() / EXTENSION_MAX) * 2 * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+//                } else {
+//                    // Increase the power limit gradually as the arm extends further
+//                    powerLimit = 1;// Math.min(EXTENDED_POWER_LIMIT, EXTENDED_POWER_LIMIT + (getCurrentExtensionPosition() - EXTENSION_MAX * 0.6) * 4);
+//                }
 
 
                 // Scale PID output to the power limit
