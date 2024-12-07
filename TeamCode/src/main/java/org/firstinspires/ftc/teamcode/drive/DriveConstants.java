@@ -21,7 +21,7 @@ public class DriveConstants {
     /*
      * These are motor constants that should be listed online for your motors.
      */
-    public static final double TICKS_PER_REV = 146.44;//146.44;
+    public static final double TICKS_PER_REV = 28;//146.44;
     public static final double MAX_RPM = 1147.22;//1147.22;
 
     /*
@@ -68,8 +68,14 @@ public class DriveConstants {
      */
     public static double MAX_VEL = 30;
     public static double MAX_ACCEL = 10;
-    public static double MAX_ANG_VEL = Math.toRadians(50);
-    public static double MAX_ANG_ACCEL = Math.toRadians(50);
+    public static double MAX_ANG_VEL = Math.toRadians(15);
+    public static double MAX_ANG_ACCEL = Math.toRadians(2);
+
+    public static double ROTATION_SLOW_ZONE = 0.7;
+    public static double ROTATION_FAST_ZONE = 0.8;
+    public static double ROTATION_SLOW_LIMITER = 0.2;
+    public static double ROTATION_FAST_LIMITER = 1.0;
+
     /*
      * Adjust the orientations here to match your robot. See the FTC SDK documentation for details.
      */
@@ -78,7 +84,7 @@ public class DriveConstants {
     public static RevHubOrientationOnRobot.UsbFacingDirection USB_FACING_DIR =
             RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
     public static double encoderTicksToInches(double ticks) {
-        return WHEEL_RADIUS * 2 * Math.PI  * ticks / (TICKS_PER_REV * GEAR_RATIO); //1.884 = numerator/ticks
+        return WHEEL_RADIUS * 2 * Math.PI  * (ticks / (TICKS_PER_REV * GEAR_RATIO)); //1.884 = numerator/ticks
     }
 
     public static double rpmToVelocity(double rpm) {

@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.hardware.RobotArm;
 import org.firstinspires.ftc.teamcode.hardware.RobotClaw;
@@ -52,12 +53,15 @@ loops++;
             automationCommands();
         } else {
             armCommands();
-            telemetry.addData("arm angle", robotArm.getCurrentRotationPosition());
-            telemetry.addData("arm extension", robotArm.getCurrentExtensionPosition());
+            telemetry.addData("Lift Angle", robotArm.getCurrentRotationPosition());
             telemetry.addData("liftMotor desired position", robotArm.getRotationDesiredPosition());
             telemetry.addData("liftMotor power", robotArm.getLiftMotorPower());
             telemetry.addData("LiftPIDOutput",robotArm.getPIDOutput());
             telemetry.addData("LiftPowerLimit", robotArm.getLiftPowerLimit());
+
+            telemetry.addData("Extension position", robotArm.getCurrentExtensionPosition());
+            telemetry.addData("Extension desired position", robotArm.getCurrentExtensionDesiredPosition());
+            telemetry.addData("Extension power", robotArm.getExtensionMotorPower());
 
             wristCommands();
             telemetry.addData("wrist position", robotArm.getCurrentWristPosition());
@@ -136,12 +140,22 @@ loops++;
 
         Pose2d weightedStickPose;
         int allianceFlip = isBlueAlliance?1:-1;
+
+        //Make the small movements very slow for most of the stick position
+        // Once the stick is moved far, then allow full power
+        // Allow a dead zone between switching modes
+        double rotationInput = 0;
+        if (gamepad1.right_stick_x <= DriveConstants.ROTATION_SLOW_ZONE) {
+            rotationInput = (gamepad1.right_stick_x/DriveConstants.ROTATION_SLOW_ZONE) * DriveConstants.ROTATION_SLOW_LIMITER;
+        } if (gamepad1.right_stick_x > DriveConstants.ROTATION_FAST_ZONE) {
+            rotationInput = (gamepad1.right_stick_x/DriveConstants.ROTATION_FAST_ZONE) * DriveConstants.ROTATION_FAST_LIMITER;
+        }
         if (fastMode) {
             Vector2d input = new Vector2d(
                     -gamepad1.left_stick_y,
                     -gamepad1.left_stick_x
             ).rotated(-drive.getPoseEstimate().getHeading());
-            weightedStickPose = new Pose2d(input.getX(), input.getY(), -gamepad1.right_stick_x);
+            weightedStickPose = new Pose2d(input.getX(), input.getY(), -rotationInput);
 //            weightedStickPose = new Pose2d(
 //                    -gamepad1.left_stick_y,
 //                    -gamepad1.left_stick_x,
@@ -159,6 +173,8 @@ loops++;
         telemetry.addData("stickY", gamepad1.left_stick_y);
         telemetry.addData("weightedX", weightedStickPose.getX());
         telemetry.addData("weightedY", weightedStickPose.getY());
+        telemetry.addData("weightedO", rotationInput);
+
 
         drive.setWeightedDrivePower(weightedStickPose);
         drive.update();

@@ -17,27 +17,29 @@ public class RobotArm {
     static final int GEAR_RATIO = 80;
     static final int CHAIN_RATIO = 40 / 15; //small gear is 15, large gear is 40
     static final double HIGH_BASKET_ANGLE_RATIO = 0.175;
-    public static int EXTENSION_MIN = 0; //TODO - put in a real value
+    public static int EXTENSION_MIN = 10; //TODO - put in a real value
     public static int EXTENSION_DRIVE = (int) (1 * COUNTS_PER_REVOLUTION);
     public static int EXTENSION_MAX = (int) (8.5 * COUNTS_PER_REVOLUTION); //TODO - put in a real value
     public static int EXTENSION_LOW_BASKET = 20; //TODO - put in a real value
     public static int EXTENSION_HIGH_BASKET = (int) (7.5 * COUNTS_PER_REVOLUTION); //43 in out //TODO - put in a real value
-    public static int POSITION_TOLERANCE_EXTENDER = 5;
+    public static int POSITION_TOLERANCE_EXTENDER = 10;
     public static int EXTEND_INTERVAL = 100;
-    private static double EXTENDER_POWER_MAX = 1.2;
+    private static double EXTENDER_POWER_MAX = 1.0;
+    private static long MAX_MILLIS_EXTENDER_TIME = 2000;
     public static int WRIST_DANGER_ZONE = 600;
     public static int ROTATE_MIN = 0;
     public static int ROTATE_DRIVE = 10;
     public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
     public static int ROTATE_HIGH_BASKET = 970;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     //ORIG 28
-    public static int ROTATE_MAX = 970;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_MAX = 1000;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     public static int ROTATE_INTERVAL = 50;
     public static double MAX_DOWN_POWER = 0.3;
     private static double EXTENDED_POWER_LIMIT = 1.0;
     private static double RETRACTED_POWER_LIMIT = 0.35;
     private final PIDController liftPID;
 
+    private long lastTimeExtenderHitPosition = System.currentTimeMillis();
 
     public static int POSITION_TOLERANCE_LIFT = 25;
     public static int BASE_ANGLE = 5;
@@ -109,9 +111,10 @@ public class RobotArm {
 
                 // Determine the power limit based on the extension
                 //double powerLimit = ((double)(getCurrentExtensionPosition()/EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
-                double powerLimit = 1;
+                double powerLimit = 0.7;
 //                if (getCurrentExtensionPosition() < EXTENSION_MAX * 0.5) {
-//                    powerLimit = ((double)(getCurrentExtensionPosition() / EXTENSION_MAX) * 2 * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+//                    powerLimit = ((double)(getCurrentExtensionPosition() / EXTENSION
+//                    _MAX) * 2 * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
 //                } else {
 //                    // Increase the power limit gradually as the arm extends further
 //                    powerLimit = 1;// Math.min(EXTENDED_POWER_LIMIT, EXTENDED_POWER_LIMIT + (getCurrentExtensionPosition() - EXTENSION_MAX * 0.6) * 4);
@@ -138,6 +141,11 @@ public class RobotArm {
         if (EXTENSION_MIN <= desiredPosition &&
                 desiredPosition <= EXTENSION_MAX) {
             extenderMotor.setTargetPosition(desiredPosition);
+            if (desiredPosition != currentExtensionDesiredPosition) {
+                //Reset our timer for last time that we were at position;
+                lastTimeExtenderHitPosition = System.currentTimeMillis();
+            }
+            currentExtensionDesiredPosition = desiredPosition;
         }
         doExtension();
 
@@ -145,10 +153,16 @@ public class RobotArm {
 
     private void doExtension() {
         if (extenderMotor.atTargetPosition()) {
+            lastTimeExtenderHitPosition = System.currentTimeMillis();
             extenderMotor.set(0);
         } else {
-            extenderMotor.setPositionCoefficient(0.01);
-            extenderMotor.set(EXTENDER_POWER_MAX);
+            if (System.currentTimeMillis() - lastTimeExtenderHitPosition > MAX_MILLIS_EXTENDER_TIME) {
+                //Don't burn out motor
+                extenderMotor.set(0);
+            } else {
+                extenderMotor.setPositionCoefficient(0.01);
+                extenderMotor.set(EXTENDER_POWER_MAX);
+            }
         }
     }
 
@@ -295,5 +309,13 @@ public class RobotArm {
 
     public void continueExtension() {
         doExtension();
+    }
+
+    public int getCurrentExtensionDesiredPosition() {
+        return currentExtensionDesiredPosition;
+    }
+
+    public double getExtensionMotorPower() {
+        return extenderMotor.get();
     }
 }

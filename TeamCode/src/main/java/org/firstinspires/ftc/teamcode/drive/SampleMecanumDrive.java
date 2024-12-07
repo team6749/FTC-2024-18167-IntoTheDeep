@@ -66,7 +66,7 @@ public class SampleMecanumDrive extends MecanumDrive {
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
-    public static double OMEGA_WEIGHT = 1;
+    public static double OMEGA_WEIGHT = .2;
 
     private TrajectorySequenceRunner trajectorySequenceRunner;
 
@@ -283,7 +283,9 @@ public class SampleMecanumDrive extends MecanumDrive {
         for (DcMotorEx motor : motors) {
             int position = motor.getCurrentPosition();
             lastEncPositions.add(position);
-            wheelPositions.add(encoderTicksToInches(position));
+            double inchesMoved = encoderTicksToInches(position);
+            telemetry.addData(motor.getDeviceName() + " enc ticks -> inches", position + " - " + inchesMoved);
+            wheelPositions.add(inchesMoved);
         }
         return wheelPositions;
     }
