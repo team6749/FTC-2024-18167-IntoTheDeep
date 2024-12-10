@@ -144,10 +144,13 @@ robotArm.publishPID(telemetry);
         //Make the small movements very slow for most of the stick position
         // Once the stick is moved far, then allow full power
         // Allow a dead zone between switching modes
+        int rotationMultiplier = gamepad1.right_stick_x >=0 ? 1 : -1;
+        double rightStickXAbs = Math.abs(gamepad1.right_stick_x);
         double rotationInput = 0;
-        if (gamepad1.right_stick_x <= DriveConstants.ROTATION_SLOW_ZONE) {
-            rotationInput = (gamepad1.right_stick_x/DriveConstants.ROTATION_SLOW_ZONE) * DriveConstants.ROTATION_SLOW_LIMITER;
-        } if (gamepad1.right_stick_x > DriveConstants.ROTATION_FAST_ZONE) {
+        if (rightStickXAbs >= DriveConstants.ROTATION_DEAD_ZONE &&
+                rightStickXAbs <= DriveConstants.ROTATION_SLOW_ZONE) {
+            rotationInput = (gamepad1.right_stick_x/DriveConstants.ROTATION_SLOW_ZONE) * (DriveConstants.ROTATION_SLOW_LIMITER-DriveConstants.ROTATION_FEED_FORWARD)+(rotationMultiplier * DriveConstants.ROTATION_FEED_FORWARD);
+        } if (rightStickXAbs > DriveConstants.ROTATION_FAST_ZONE) {
             rotationInput = (gamepad1.right_stick_x/DriveConstants.ROTATION_FAST_ZONE) * DriveConstants.ROTATION_FAST_LIMITER;
         }
         if (fastMode) {
@@ -165,7 +168,7 @@ robotArm.publishPID(telemetry);
             weightedStickPose = new Pose2d(
                     -gamepad1.left_stick_y / SLOW_MODE_STICK_DIVISOR,
                     -gamepad1.left_stick_x / SLOW_MODE_STICK_DIVISOR,
-                    -gamepad1.right_stick_x / SLOW_MODE_STICK_DIVISOR
+                    -rotationInput / SLOW_MODE_STICK_DIVISOR
             );
         }
         telemetry.addData("fastSlow", fastMode ? "fast" : "SLOW");
@@ -174,7 +177,7 @@ robotArm.publishPID(telemetry);
         telemetry.addData("weightedX", weightedStickPose.getX());
         telemetry.addData("weightedY", weightedStickPose.getY());
         telemetry.addData("weightedO", rotationInput);
-
+        telemetry.addData("turnStick", gamepad1.right_stick_x);
 
         drive.setWeightedDrivePower(weightedStickPose);
         drive.update();

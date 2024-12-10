@@ -79,10 +79,12 @@ public class DriveConstants {
      * Max Recommended Angular Velocity (deg): 469.35005455425284
      * Max Recommended Angular Velocity (rad): 8.191703796386719
      */
-    public static double ROTATION_SLOW_ZONE = 0.7;
-    public static double ROTATION_FAST_ZONE = 0.8;
-    public static double ROTATION_SLOW_LIMITER = 0.2;
-    public static double ROTATION_FAST_LIMITER = 1.0;
+    public static double ROTATION_SLOW_ZONE = 0.8;
+    public static double ROTATION_FAST_ZONE = 0.95;
+    public static double ROTATION_FEED_FORWARD = 0.09;
+    public static double ROTATION_DEAD_ZONE = 0.02;
+    public static double ROTATION_SLOW_LIMITER = 0.15;
+    public static double ROTATION_FAST_LIMITER = 0.4;
 
     /*
      * Note from LearnRoadRunner.com:
