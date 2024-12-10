@@ -156,13 +156,13 @@ public class RobotArm {
             lastTimeExtenderHitPosition = System.currentTimeMillis();
             extenderMotor.set(0);
         } else {
-            if (System.currentTimeMillis() - lastTimeExtenderHitPosition > MAX_MILLIS_EXTENDER_TIME) {
-                //Don't burn out motor
-                extenderMotor.set(0);
-            } else {
+//            if (System.currentTimeMillis() - lastTimeExtenderHitPosition > MAX_MILLIS_EXTENDER_TIME) {
+//                //Don't burn out motor
+//                extenderMotor.set(0);
+//            } else {
                 extenderMotor.setPositionCoefficient(0.01);
                 extenderMotor.set(EXTENDER_POWER_MAX);
-            }
+//            }
         }
     }
 

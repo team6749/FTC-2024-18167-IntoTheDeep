@@ -117,8 +117,8 @@ public class SampleMecanumDrive extends MecanumDrive {
             motorConfigurationType.setAchieveableMaxRPMFraction(1.0);
             //Forcing these values here since the right HD Ultraplanetary motor is not avail.
             motorConfigurationType.setGearing(5.23);
-            motorConfigurationType.setTicksPerRev(146.44);
-            motorConfigurationType.setMaxRPM(1147);
+            motorConfigurationType.setTicksPerRev(28);
+            motorConfigurationType.setMaxRPM(6000);
 
 //            motorConfigurationType.setGearing(1);
 //            motorConfigurationType.setTicksPerRev(28);

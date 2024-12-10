@@ -81,17 +81,17 @@ loops++;
     }
     private void armCommands() {
 
-            if (gamepad1.dpad_up) {
+            if (gamepad1.dpad_up || gamepad2.dpad_up) {
                 robotArm.raiseArm();
-            } else if (gamepad1.dpad_down) {
+            } else if (gamepad1.dpad_down || gamepad2.dpad_down) {
                 robotArm.lowerArm();
             } else {
                 robotArm.continueRotating();
             }
 
-            if (gamepad1.right_bumper) {
+            if (gamepad1.right_bumper || gamepad2.right_bumper) {
                 robotArm.extendArm();
-            } else if (gamepad1.left_bumper) {
+            } else if (gamepad1.left_bumper || gamepad2.left_bumper) {
                 robotArm.retractArm();
             } else {
                 robotArm.continueExtension();
