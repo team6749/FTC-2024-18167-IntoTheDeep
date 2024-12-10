@@ -80,7 +80,7 @@ loops++;
         }
     }
     private void armCommands() {
-
+robotArm.publishPID(telemetry);
             if (gamepad1.dpad_up || gamepad2.dpad_up) {
                 robotArm.raiseArm();
             } else if (gamepad1.dpad_down || gamepad2.dpad_down) {

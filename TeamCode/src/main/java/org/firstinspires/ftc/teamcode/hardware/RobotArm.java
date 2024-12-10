@@ -1,13 +1,18 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 
+import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+
+@Config
 public class RobotArm {
     Motor extenderMotor;
     DcMotorEx liftMotor;
@@ -34,30 +39,38 @@ public class RobotArm {
     //ORIG 28
     public static int ROTATE_MAX = 1000;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     public static int ROTATE_INTERVAL = 50;
-    public static double MAX_DOWN_POWER = 0.3;
+    public static double MAX_DOWN_POWER = 0.28;
     private static double EXTENDED_POWER_LIMIT = 1.0;
     private static double RETRACTED_POWER_LIMIT = 0.35;
-    private final PIDController liftPID;
+    private PIDController liftPID;
+
+    private PIDController liftPID2;
+    public static double p = 0.005;
+    public static double i = 0;
+    public static double d = 0;
+    public static double f = 0.000009;
+
 
     private long lastTimeExtenderHitPosition = System.currentTimeMillis();
 
-    public static int POSITION_TOLERANCE_LIFT = 25;
+    public static int POSITION_TOLERANCE_LIFT = 28;
     public static int BASE_ANGLE = 5;
 
     private int currentRotationDesiredPosition = ROTATE_MIN;
     private int currentExtensionDesiredPosition = EXTENSION_MIN;
 
+    public static TouchSensor lowerLimitExtensionSwitch = null;
 
     RobotClaw robotClaw;
 
     public RobotArm(HardwareMap hwMap) {
         extenderMotor = new Motor(hwMap, "extender_motor", Motor.GoBILDA.RPM_435);
         extenderMotor.setRunMode(Motor.RunMode.PositionControl);
-        extenderMotor.stopAndResetEncoder();
         extenderMotor.setInverted(true);
-        //verticalMotor.setTargetPosition(0);
         extenderMotor.setPositionTolerance(POSITION_TOLERANCE_EXTENDER);
         extenderMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
+        extenderMotor.stopAndResetEncoder();
+        extenderMotor.setTargetPosition(0);
         extenderMotor.set(0);
 
 
@@ -66,12 +79,17 @@ public class RobotArm {
         liftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         liftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         liftMotor.setTargetPositionTolerance(POSITION_TOLERANCE_LIFT);
-        liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         liftMotor.setPower(0);
 
-        // Configure the PID controller
+        lowerLimitExtensionSwitch = hwMap.get(TouchSensor.class, "lowerLimitExtensionSwitch");
+
         liftPID = new PIDController(0.15, 0.1, 0.0);
         liftPID.setTolerance(POSITION_TOLERANCE_LIFT);
+
+
+        liftPID2 = new PIDController(0.15, 0.1, 0.0);
+        liftPID2.setTolerance(POSITION_TOLERANCE_LIFT);
 
         robotClaw = new RobotClaw(hwMap);
     }
@@ -101,32 +119,89 @@ public class RobotArm {
         }
     }
 
-    private void doRotation() {
+//    private void doRotation() {
+//        if (isAtRotation(currentRotationDesiredPosition)) {
+//            liftMotor.setPower(0);
+//        } else {
+//            double powerLimit = 0;
+//            if (liftMotor.getCurrentPosition() <= currentRotationDesiredPosition) {
+//
+//                // Get the PID output
+//                double pidOutput = liftPID.calculate(liftMotor.getCurrentPosition(), currentRotationDesiredPosition);
+//
+//                // Determine the power limit based on the extension
+//                //double powerLimit = ((double)(getCurrentExtensionPosition()/EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+//                powerLimit = .7;
+////                if (getCurrentExtensionPosition() < EXTENSION_MAX * 0.5) {
+////                    powerLimit = ((double)(getCurrentExtensionPosition() / EXTENSION
+////                    _MAX) * 2 * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
+////                } else {
+////                    // Increase the power limit gradually as the arm extends further
+////                    powerLimit = 1;// Math.min(EXTENDED_POWER_LIMIT, EXTENDED_POWER_LIMIT + (getCurrentExtensionPosition() - EXTENSION_MAX * 0.6) * 4);
+////                }
+//
+//
+//                // Scale PID output to the power limit
+//                double adjustedPower = Math.max(-powerLimit, Math.min(pidOutput, powerLimit));
+//                liftMotor.setPower(adjustedPower);
+//            } else {
+//                liftMotor.setPower(-MAX_DOWN_POWER);
+////                powerLimit = MAX_DOWN_POWER;
+//            }
+//
+//
+//        }
+
+
+//    }
+
+    private void doRotation () {
+        // Configure the PID controller
+        liftPID2.setPID(p, i, d);
+        double angleInRadians = Math.toRadians(((double) liftMotor.getCurrentPosition() / ROTATE_MAX) * .75);
+        double armLengthInMeters = .33 + (.94 * getCurrentExtensionPosition() / EXTENSION_MAX);
+        double feedForward = f;// * armLengthInMeters * Math.cos(angleInRadians);
+        liftPID2.setF(feedForward);
+        double powerLimit = .7;
+        double pidOutput = liftPID2.calculate(liftMotor.getCurrentPosition(), currentRotationDesiredPosition);
+        double adjustedPower = Math.max(-powerLimit, Math.min(pidOutput, powerLimit));
+        liftMotor.setPower(adjustedPower);
+    }
+    public void publishPID(Telemetry telemetry) {
+
+        // Configure the PID controller
+        liftPID2.setPID(p, i, d);
+        double angleInRadians = Math.toRadians(((double) liftMotor.getCurrentPosition() / ROTATE_MAX) * .75);
+        double armLengthInMeters = .33 + (.94 * getCurrentExtensionPosition() / EXTENSION_MAX);
+        double feedForward = f;// * armLengthInMeters * Math.cos(angleInRadians);
+        liftPID2.setF(feedForward);
+        double powerLimit = .7;
+        double pidOutput = liftPID2.calculate(liftMotor.getCurrentPosition(), currentRotationDesiredPosition);
+        double adjustedPower = Math.max(-powerLimit, Math.min(pidOutput, powerLimit));
+
+        telemetry.addData("PID POWER", adjustedPower);
+        telemetry.addData("PID OUTPUT", pidOutput);
+        telemetry.addData("FF OUTPUT", feedForward);
+        telemetry.addData("PID ANGLE", angleInRadians);
+        telemetry.addData("PID ARM LENGTH", armLengthInMeters);
+        telemetry.addData("PID FEED FORWARD", feedForward);
+    }
+
+    private void doRotation2() {
         if (isAtRotation(currentRotationDesiredPosition)) {
             liftMotor.setPower(0);
         } else {
-            if (liftMotor.getCurrentPosition() <= currentRotationDesiredPosition) {
-                // Get the PID output
-                double pidOutput = liftPID.calculate(liftMotor.getCurrentPosition(), currentRotationDesiredPosition);
-
-                // Determine the power limit based on the extension
-                //double powerLimit = ((double)(getCurrentExtensionPosition()/EXTENSION_MAX) * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
-                double powerLimit = 0.7;
-//                if (getCurrentExtensionPosition() < EXTENSION_MAX * 0.5) {
-//                    powerLimit = ((double)(getCurrentExtensionPosition() / EXTENSION
-//                    _MAX) * 2 * (EXTENDED_POWER_LIMIT - RETRACTED_POWER_LIMIT)) + RETRACTED_POWER_LIMIT;
-//                } else {
-//                    // Increase the power limit gradually as the arm extends further
-//                    powerLimit = 1;// Math.min(EXTENDED_POWER_LIMIT, EXTENDED_POWER_LIMIT + (getCurrentExtensionPosition() - EXTENSION_MAX * 0.6) * 4);
-//                }
+            // Configure the PID controller
+            double angleInRadians = Math.toRadians(((double) liftMotor.getCurrentPosition() / ROTATE_MAX) * .75);
+            double armLengthInMeters = .33 + (.94 * getCurrentExtensionPosition() / EXTENSION_MAX);
+            double feedForward = 0.2 * armLengthInMeters * Math.cos(angleInRadians);
+            liftPID.setF(feedForward);
+            double powerLimit = .7;
+            double pidOutput = liftPID.calculate(liftMotor.getCurrentPosition(), currentRotationDesiredPosition);
+            double adjustedPower = Math.max(-powerLimit, Math.min(pidOutput, powerLimit));
+            liftMotor.setPower(adjustedPower);
 
 
-                // Scale PID output to the power limit
-                double adjustedPower = Math.max(-powerLimit, Math.min(pidOutput, powerLimit));
-                liftMotor.setPower(adjustedPower);
-            } else {
-                liftMotor.setPower(-MAX_DOWN_POWER);
-            }
         }
 
 
@@ -152,17 +227,19 @@ public class RobotArm {
     }
 
     private void doExtension() {
-        if (extenderMotor.atTargetPosition()) {
+        if (lowerLimitExtensionSwitch.isPressed() && Math.abs(extenderMotor.getCurrentPosition()) > POSITION_TOLERANCE_EXTENDER) {
+            extenderMotor.set(0);
+            extenderMotor.stopAndResetEncoder();
+            extenderMotor.setTargetPosition(0);
+            currentExtensionDesiredPosition = 0;
+        }
+        if (extenderMotor.atTargetPosition() ||
+                (lowerLimitExtensionSwitch.isPressed() && currentExtensionDesiredPosition == 0)) {
             lastTimeExtenderHitPosition = System.currentTimeMillis();
             extenderMotor.set(0);
         } else {
-//            if (System.currentTimeMillis() - lastTimeExtenderHitPosition > MAX_MILLIS_EXTENDER_TIME) {
-//                //Don't burn out motor
-//                extenderMotor.set(0);
-//            } else {
                 extenderMotor.setPositionCoefficient(0.01);
                 extenderMotor.set(EXTENDER_POWER_MAX);
-//            }
         }
     }
 
@@ -318,4 +395,6 @@ public class RobotArm {
     public double getExtensionMotorPower() {
         return extenderMotor.get();
     }
+
+
 }
