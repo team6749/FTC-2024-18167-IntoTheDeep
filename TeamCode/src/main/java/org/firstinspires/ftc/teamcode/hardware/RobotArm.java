@@ -325,6 +325,9 @@ public class RobotArm {
     public boolean isInDangerZone() {
         return extenderMotor.getCurrentPosition() < WRIST_DANGER_ZONE;
     }
+    public boolean isArmExtendedDangerMode() {
+        return extenderMotor.getCurrentPosition() > WRIST_DANGER_ZONE;
+    }
 
     public boolean isClawOpen() {
         return robotClaw.isOpen();

@@ -81,7 +81,7 @@ public class DriveConstants {
      */
     public static double ROTATION_SLOW_ZONE = 0.8;
     public static double ROTATION_FAST_ZONE = 0.95;
-    public static double ROTATION_FEED_FORWARD = 0.09;
+    public static double ROTATION_FEED_FORWARD = 0.12;
     public static double ROTATION_DEAD_ZONE = 0.02;
     public static double ROTATION_SLOW_LIMITER = 0.15;
     public static double ROTATION_FAST_LIMITER = 0.4;

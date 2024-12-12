@@ -19,6 +19,7 @@ public class MainDriveOpMode extends OpMode {
     RobotArm robotArm;
     boolean fastMode = true;
     double SLOW_MODE_STICK_DIVISOR = 3;
+    double SUPER_SLOW_MODE_STICK_DIVISOR = 6;
     private boolean backButtonPressedLast = false; // Tracks the previous state of the back button
 
     private long lastToggleTime = 0;
@@ -80,7 +81,7 @@ loops++;
         }
     }
     private void armCommands() {
-robotArm.publishPID(telemetry);
+            robotArm.publishPID(telemetry);
             if (gamepad1.dpad_up || gamepad2.dpad_up) {
                 robotArm.raiseArm();
             } else if (gamepad1.dpad_down || gamepad2.dpad_down) {
@@ -145,33 +146,35 @@ robotArm.publishPID(telemetry);
         // Once the stick is moved far, then allow full power
         // Allow a dead zone between switching modes
         int rotationMultiplier = gamepad1.right_stick_x >=0 ? 1 : -1;
+        boolean fastTurnMode = gamepad1.right_stick_button;
         double rightStickXAbs = Math.abs(gamepad1.right_stick_x);
         double rotationInput = 0;
-        if (rightStickXAbs >= DriveConstants.ROTATION_DEAD_ZONE &&
-                rightStickXAbs <= DriveConstants.ROTATION_SLOW_ZONE) {
-            rotationInput = (gamepad1.right_stick_x/DriveConstants.ROTATION_SLOW_ZONE) * (DriveConstants.ROTATION_SLOW_LIMITER-DriveConstants.ROTATION_FEED_FORWARD)+(rotationMultiplier * DriveConstants.ROTATION_FEED_FORWARD);
-        } if (rightStickXAbs > DriveConstants.ROTATION_FAST_ZONE) {
-            rotationInput = (gamepad1.right_stick_x/DriveConstants.ROTATION_FAST_ZONE) * DriveConstants.ROTATION_FAST_LIMITER;
+        if (rightStickXAbs >= DriveConstants.ROTATION_DEAD_ZONE) {
+            if (!fastTurnMode) { //Slow turn mode -- normal
+                rotationInput = gamepad1.right_stick_x * (DriveConstants.ROTATION_SLOW_LIMITER - DriveConstants.ROTATION_FEED_FORWARD) + (rotationMultiplier * DriveConstants.ROTATION_FEED_FORWARD);
+            } else {
+                rotationInput = gamepad1.right_stick_x * DriveConstants.ROTATION_FAST_LIMITER;
+            }
         }
-        if (fastMode) {
-            Vector2d input = new Vector2d(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x
-            ).rotated(-drive.getPoseEstimate().getHeading());
-            weightedStickPose = new Pose2d(input.getX(), input.getY(), -rotationInput);
-//            weightedStickPose = new Pose2d(
-//                    -gamepad1.left_stick_y,
-//                    -gamepad1.left_stick_x,
-//                    -gamepad1.right_stick_x
-//            );
-        } else {
-            weightedStickPose = new Pose2d(
-                    -gamepad1.left_stick_y / SLOW_MODE_STICK_DIVISOR,
-                    -gamepad1.left_stick_x / SLOW_MODE_STICK_DIVISOR,
-                    -rotationInput / SLOW_MODE_STICK_DIVISOR
-            );
+
+        boolean superSlowMode = robotArm.isArmExtendedDangerMode();
+        double yStick = gamepad1.left_stick_y;
+        double xStick = gamepad1.left_stick_x;
+        if (superSlowMode) {
+            yStick = gamepad1.left_stick_y / SUPER_SLOW_MODE_STICK_DIVISOR;
+            xStick = gamepad1.left_stick_x/ SUPER_SLOW_MODE_STICK_DIVISOR;
+        } else if (!fastMode) {
+            yStick = gamepad1.left_stick_y / SLOW_MODE_STICK_DIVISOR;
+            xStick = gamepad1.left_stick_x/ SLOW_MODE_STICK_DIVISOR;
         }
+        Vector2d input = new Vector2d(
+                -yStick,
+                -xStick
+        ).rotated(-drive.getPoseEstimate().getHeading());
+        weightedStickPose = new Pose2d(input.getX(), input.getY(), -rotationInput);
+
         telemetry.addData("fastSlow", fastMode ? "fast" : "SLOW");
+        telemetry.addData("armExtendedSlow", superSlowMode ? "normal" : "SUPER SLOW");
         telemetry.addData("stickX", gamepad1.left_stick_x);
         telemetry.addData("stickY", gamepad1.left_stick_y);
         telemetry.addData("weightedX", weightedStickPose.getX());
