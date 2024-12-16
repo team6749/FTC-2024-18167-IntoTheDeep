@@ -19,7 +19,8 @@ public class MainDriveOpMode extends OpMode {
     RobotArm robotArm;
     boolean fastMode = true;
     double SLOW_MODE_STICK_DIVISOR = 3;
-    double SUPER_SLOW_MODE_STICK_DIVISOR = 6;
+    double SUPER_SLOW_MODE_STICK_DIVISOR = 4
+            ;
     private boolean backButtonPressedLast = false; // Tracks the previous state of the back button
 
     private long lastToggleTime = 0;
@@ -162,10 +163,10 @@ loops++;
         double xStick = gamepad1.left_stick_x;
         if (superSlowMode) {
             yStick = gamepad1.left_stick_y / SUPER_SLOW_MODE_STICK_DIVISOR;
-            xStick = gamepad1.left_stick_x/ SUPER_SLOW_MODE_STICK_DIVISOR;
+            xStick = gamepad1.left_stick_x / SUPER_SLOW_MODE_STICK_DIVISOR;
         } else if (!fastMode) {
             yStick = gamepad1.left_stick_y / SLOW_MODE_STICK_DIVISOR;
-            xStick = gamepad1.left_stick_x/ SLOW_MODE_STICK_DIVISOR;
+            xStick = gamepad1.left_stick_x / SLOW_MODE_STICK_DIVISOR;
         }
         Vector2d input = new Vector2d(
                 -yStick,

@@ -33,9 +33,9 @@ public class RobotArm {
     private static long MAX_MILLIS_EXTENDER_TIME = 2000;
     public static int WRIST_DANGER_ZONE = 600;
     public static int ROTATE_MIN = 0;
-    public static int ROTATE_DRIVE = 10;
+    public static int ROTATE_DRIVE = 140;
     public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
-    public static int ROTATE_HIGH_BASKET = 970;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
+    public static int ROTATE_HIGH_BASKET = 1000;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     //ORIG 28
     public static int ROTATE_MAX = 1000;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     public static int ROTATE_INTERVAL = 50;
@@ -252,7 +252,8 @@ public class RobotArm {
     }
 
     private boolean isAtDriveExtension() {
-        return isExtenderAtPosition(EXTENSION_DRIVE);
+        //We give this a little more tolerance -- because we just need to be close.
+        return Math.abs(extenderMotor.getCurrentPosition() - EXTENSION_DRIVE) <= (POSITION_TOLERANCE_EXTENDER * 2.5);
     }
 
     public void driveMode() {
@@ -272,8 +273,10 @@ public class RobotArm {
     }
 
     public void toHighBasket() {
-        slideToPosition(EXTENSION_HIGH_BASKET);
         rotateToHighBasket();
+        if(isAtRotation(ROTATE_HIGH_BASKET)) {
+            slideToPosition(EXTENSION_HIGH_BASKET);
+        }
     }
 
     public void toLowBasket() {
