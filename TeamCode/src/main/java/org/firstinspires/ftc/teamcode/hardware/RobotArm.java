@@ -25,8 +25,8 @@ public class RobotArm {
     public static int EXTENSION_MIN = 10; //TODO - put in a real value
     public static int EXTENSION_DRIVE = (int) (1 * COUNTS_PER_REVOLUTION);
     public static int EXTENSION_MAX = (int) (8.5 * COUNTS_PER_REVOLUTION); //TODO - put in a real value
-    public static int EXTENSION_LOW_BASKET = 20; //TODO - put in a real value
-    public static int EXTENSION_HIGH_BASKET = (int) (7.5 * COUNTS_PER_REVOLUTION); //43 in out //TODO - put in a real value
+    public static int EXTENSION_LOW_BASKET = (int) (4.125 * COUNTS_PER_REVOLUTION);
+    public static int EXTENSION_HIGH_BASKET = (int) (7.5 * COUNTS_PER_REVOLUTION); //43 in out
     public static int POSITION_TOLERANCE_EXTENDER = 10;
     public static int EXTEND_INTERVAL = 100;
     private static double EXTENDER_POWER_MAX = 1.0;
@@ -34,7 +34,7 @@ public class RobotArm {
     public static int WRIST_DANGER_ZONE = 600;
     public static int ROTATE_MIN = 0;
     public static int ROTATE_DRIVE = 140;
-    public static int ROTATE_LOW_BASKET = 50; //TODO - put in a real value
+    public static int ROTATE_LOW_BASKET = 750;
     public static int ROTATE_HIGH_BASKET = 1000;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     //ORIG 28
     public static int ROTATE_MAX = 1000;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
@@ -280,7 +280,10 @@ public class RobotArm {
     }
 
     public void toLowBasket() {
-        slideToPosition(EXTENSION_LOW_BASKET);
+        rotateToLowBasket();
+        if(isAtRotation(ROTATE_LOW_BASKET)) {
+            slideToPosition(EXTENSION_LOW_BASKET);
+        }
     }
 
 

@@ -79,6 +79,8 @@ loops++;
             robotArm.driveMode();
         } else if (gamepad1.a && gamepad1.right_trigger > 0) {
             robotArm.toHighBasket();
+        } else if (gamepad1.a && gamepad1.left_trigger > 0) {
+            robotArm.toLowBasket();
         }
     }
     private void armCommands() {
