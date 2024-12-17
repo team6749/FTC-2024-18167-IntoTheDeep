@@ -34,7 +34,7 @@ public class RobotArm {
     public static int WRIST_DANGER_ZONE = 600;
     public static int ROTATE_MIN = 0;
     public static int ROTATE_DRIVE = 140;
-    public static int ROTATE_LOW_BASKET = 750;
+    public static int ROTATE_LOW_BASKET = 800;
     public static int ROTATE_HIGH_BASKET = 1000;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value
     //ORIG 28
     public static int ROTATE_MAX = 1000;//(int) (LIFT_COUNTS_PER_REVOLUTION * 29.5 * 0.8);//63 degrees with gear ratio * chain ratio = 160 is about 28 rotations. //TODO - put in a real value

@@ -87,17 +87,17 @@ loops++;
     }
     private void armCommands() {
             robotArm.publishPID(telemetry);
-            if (gamepad1.dpad_up || gamepad2.right_stick_y > DEAD_ZONE) {
+            if (gamepad1.dpad_up || gamepad2.right_stick_y < -DEAD_ZONE) {
                 robotArm.raiseArm();
-            } else if (gamepad1.dpad_down || gamepad2.right_stick_y < -DEAD_ZONE) {
+            } else if (gamepad1.dpad_down || gamepad2.right_stick_y > DEAD_ZONE) {
                 robotArm.lowerArm();
             } else {
                 robotArm.continueRotating();
             }
 
-            if (gamepad1.right_bumper || gamepad2.left_stick_y > DEAD_ZONE) {
+            if (gamepad1.right_bumper || gamepad2.left_stick_y < -DEAD_ZONE) {
                 robotArm.extendArm();
-            } else if (gamepad1.left_bumper || gamepad2.left_stick_y < -DEAD_ZONE) {
+            } else if (gamepad1.left_bumper || gamepad2.left_stick_y > DEAD_ZONE) {
                 robotArm.retractArm();
             } else {
                 robotArm.continueExtension();
