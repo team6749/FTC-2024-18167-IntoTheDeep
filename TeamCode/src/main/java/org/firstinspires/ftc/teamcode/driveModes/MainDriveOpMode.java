@@ -19,8 +19,8 @@ public class MainDriveOpMode extends OpMode {
     RobotArm robotArm;
     boolean fastMode = true;
     double SLOW_MODE_STICK_DIVISOR = 3;
-    double SUPER_SLOW_MODE_STICK_DIVISOR = 4
-            ;
+    double SUPER_SLOW_MODE_STICK_DIVISOR = 3;
+    double DEAD_ZONE = 0.1;
     private boolean backButtonPressedLast = false; // Tracks the previous state of the back button
 
     private long lastToggleTime = 0;
@@ -75,27 +75,29 @@ loops++;
     }
 
     private void automationCommands() {
-        if (gamepad1.x) {
+        if (gamepad1.x || gamepad2.x) {
             robotArm.driveMode();
-        } else if (gamepad1.a && gamepad1.right_trigger > 0) {
+        } else if ((gamepad1.a && gamepad1.right_trigger > 0) ||
+                (gamepad2.a && gamepad2.right_trigger > 0)) {
             robotArm.toHighBasket();
-        } else if (gamepad1.a && gamepad1.left_trigger > 0) {
+        } else if ((gamepad1.a && gamepad1.left_trigger > 0) ||
+                (gamepad2.a && gamepad2.left_trigger > 0)) {
             robotArm.toLowBasket();
         }
     }
     private void armCommands() {
             robotArm.publishPID(telemetry);
-            if (gamepad1.dpad_up || gamepad2.dpad_up) {
+            if (gamepad1.dpad_up || gamepad2.right_stick_y > DEAD_ZONE) {
                 robotArm.raiseArm();
-            } else if (gamepad1.dpad_down || gamepad2.dpad_down) {
+            } else if (gamepad1.dpad_down || gamepad2.right_stick_y < -DEAD_ZONE) {
                 robotArm.lowerArm();
             } else {
                 robotArm.continueRotating();
             }
 
-            if (gamepad1.right_bumper || gamepad2.right_bumper) {
+            if (gamepad1.right_bumper || gamepad2.left_stick_y > DEAD_ZONE) {
                 robotArm.extendArm();
-            } else if (gamepad1.left_bumper || gamepad2.left_bumper) {
+            } else if (gamepad1.left_bumper || gamepad2.left_stick_y < -DEAD_ZONE) {
                 robotArm.retractArm();
             } else {
                 robotArm.continueExtension();
@@ -106,15 +108,15 @@ loops++;
 
     private void wristCommands() {
         boolean operationAllowed = true;
-        if (gamepad1.right_trigger > 0) {
+        if (gamepad1.right_trigger > 0 || gamepad2.left_stick_x > DEAD_ZONE) {
             operationAllowed = robotArm.rotateWristRight();
-        } else if (gamepad1.left_trigger > 0) {
+        } else if (gamepad1.left_trigger > 0 || gamepad2.left_stick_x < -DEAD_ZONE) {
             operationAllowed = robotArm.rotateWristLeft();
         } else {
            robotArm.rotateWristCenter();
         }
         if (!operationAllowed) {
-            gamepad1.rumble(30);
+            gamepad1.rumble(100);
 
             telemetry.addData("DANGER_ZONE", "WRIST MOVEMENT NOT AVAIL");
         }
@@ -122,10 +124,10 @@ loops++;
 
     private void clawCommands() {
         //Claw Movement
-        if (gamepad1.y) {
+        if (gamepad1.y || gamepad2.right_bumper) {
             robotArm.openClaw();
         }
-        if (gamepad1.b){
+        if (gamepad1.b || gamepad2.left_bumper){
             robotArm.closeClaw();
         }
     }
