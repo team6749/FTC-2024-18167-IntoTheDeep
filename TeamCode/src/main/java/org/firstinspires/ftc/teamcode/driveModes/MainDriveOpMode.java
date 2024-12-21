@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -79,6 +80,11 @@ loops++;
             robotArm.driveMode();
         } else if ((gamepad1.a && gamepad1.right_trigger > 0) ||
                 (gamepad2.a && gamepad2.right_trigger > 0)) {
+//            Trajectory fwd5sr5 = drive.trajectoryBuilder(new Pose2d())
+//                    .forward(5)
+//                    .strafeRight(5)
+//                    .build();
+//            drive.followTrajectory(fwd5sr5);
             robotArm.toHighBasket();
         } else if ((gamepad1.a && gamepad1.left_trigger > 0) ||
                 (gamepad2.a && gamepad2.left_trigger > 0)) {
