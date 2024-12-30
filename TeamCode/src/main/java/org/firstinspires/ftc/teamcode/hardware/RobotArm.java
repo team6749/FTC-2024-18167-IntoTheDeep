@@ -17,7 +17,12 @@ public class RobotArm {
     Motor extenderMotor;
     DcMotorEx liftMotor;
 
-    static final double COUNTS_PER_REVOLUTION = 384.5;
+    public static double EXTENDER_KS = 0.05;
+    public static double EXTENDER_KV = 0.5;
+    public static double EXTENDER_KA = 0.5;
+    public static double EXTENDER_POS_CF_CLOSE = 0.007;
+    public static double EXTENDER_POS_CF_FAR = 0.014;
+    static double COUNTS_PER_REVOLUTION = 384.5;
     static final int LIFT_COUNTS_PER_REVOLUTION = 28;// # Adjust this for the specific motor encoder counts per revolution
     static final int GEAR_RATIO = 80;
     static final int CHAIN_RATIO = 40 / 15; //small gear is 15, large gear is 40
@@ -29,7 +34,8 @@ public class RobotArm {
     public static int EXTENSION_HIGH_BASKET = (int) (7.5 * COUNTS_PER_REVOLUTION); //43 in out
     public static int POSITION_TOLERANCE_EXTENDER = 10;
     public static int EXTEND_INTERVAL = 100;
-    private static double EXTENDER_POWER_MAX = 1.0;
+    public static double EXTENDER_POWER_MAX_FAR = 1.0;
+    public static double EXTENDER_POWER_MAX_CLOSE = 0.5;
     private static long MAX_MILLIS_EXTENDER_TIME = 2000;
     public static int WRIST_DANGER_ZONE = 600;
     public static int ROTATE_MIN = 0;
@@ -71,6 +77,8 @@ public class RobotArm {
         extenderMotor.setZeroPowerBehavior(Motor.ZeroPowerBehavior.BRAKE);
         extenderMotor.stopAndResetEncoder();
         extenderMotor.setTargetPosition(0);
+//        extenderMotor.setFeedforwardCoefficients(EXTENDER_KS, EXTENDER_KV, EXTENDER_KA);
+//        extenderMotor.setPositionCoefficient(EXTENDER_POS_CF);
         extenderMotor.set(0);
 
 
@@ -238,8 +246,13 @@ public class RobotArm {
             lastTimeExtenderHitPosition = System.currentTimeMillis();
             extenderMotor.set(0);
         } else {
-                extenderMotor.setPositionCoefficient(0.01);
-                extenderMotor.set(EXTENDER_POWER_MAX);
+            if (Math.abs(currentExtensionDesiredPosition-extenderMotor.getCurrentPosition()) > 300) {
+                extenderMotor.setPositionCoefficient(EXTENDER_POS_CF_FAR);
+                extenderMotor.set(EXTENDER_POWER_MAX_FAR);
+            } else {
+                extenderMotor.setPositionCoefficient(EXTENDER_POS_CF_CLOSE);
+                extenderMotor.set(EXTENDER_POWER_MAX_CLOSE);
+            }
         }
     }
 
