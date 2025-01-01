@@ -25,7 +25,7 @@ public class AutoA extends OpMode {
 //    SampleMecanumDrive drive = new SampleMecanumDrive();
     IMU imu2;
     int stepNbr;
-    int END_STEP_NBR = 4;
+    int END_STEP_NBR = 2;
 
     @Override
     public void init() {
@@ -36,12 +36,12 @@ public class AutoA extends OpMode {
 
     @Override
     public void start() {
-        stepNbr = 0;
+        stepNbr = 1;
     }
 
     @Override
     public void loop() {
-
+        Trajectory trajectory;
         telemetry.addData("Step #", stepNbr);
         if (stepNbr <= END_STEP_NBR) {
 
@@ -62,17 +62,21 @@ public class AutoA extends OpMode {
                     mStateTime.reset();
                     break;
                 case 2:
+                    trajectory = drive.trajectoryBuilder(new Pose2d())
+                            .strafeRight(20)
+                            .build();
+                    drive.followTrajectory(trajectory);
                     // Turn -90 degrees
-                    drive.turn(Math.toRadians(90));
+//                    drive.turn(Math.toRadians(90));
                     stepNbr++;
                     mStateTime.reset();
                     break;
                 case 3:
                     // Left 3 ft
-                    Trajectory sl36 = drive.trajectoryBuilder(new Pose2d())
+                    trajectory = drive.trajectoryBuilder(new Pose2d())
                             .strafeLeft(36)
                             .build();
-                    drive.followTrajectory(sl36);
+                    drive.followTrajectory(trajectory);
                     stepNbr++;
                     mStateTime.reset();
                     break;
