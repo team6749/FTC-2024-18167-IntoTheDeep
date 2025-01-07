@@ -52,7 +52,7 @@ loops++;
         telemetry.addData("y", poseEstimate.getY());
         telemetry.addData("heading", poseEstimate.getHeading());
 
-        if (gamepad1.a || gamepad1.x) {
+        if (gamepad1.a || gamepad1.x || gamepad2.a || gamepad2.x) {
             automationCommands();
         } else {
             armCommands();
