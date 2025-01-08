@@ -61,24 +61,24 @@ public class AutoAMoveToObservation extends OpMode {
                     mStateTime.reset();
                     break;
                 case 2:
-                    trajectory = drive.trajectoryBuilder(new Pose2d())
-                            .strafeRight(72)
+                    Trajectory trajectory2 = drive.trajectoryBuilder(new Pose2d())
+                            .strafeRight(63)
                             .build();
-                    drive.followTrajectory(trajectory);
+                    drive.followTrajectory(trajectory2);
                     // Turn -90 degrees
 //                    drive.turn(Math.toRadians(90));
                     stepNbr++;
                     mStateTime.reset();
                     break;
-                case 3:
-                    // Left 3 ft
-                    trajectory = drive.trajectoryBuilder(new Pose2d())
-                            .back(20)
-                            .build();
-                    drive.followTrajectory(trajectory);
-                    stepNbr++;
-                    mStateTime.reset();
-                    break;
+//                case 3:
+//                    // Left 3 ft
+//                    Trajectory trajectory3 = drive.trajectoryBuilder(new Pose2d())
+//                            .back(20)
+//                            .build();
+//                    drive.followTrajectory(trajectory3);
+//                    stepNbr++;
+//                    mStateTime.reset();
+//                    break;
 //                case 4:
 //                    // Turn -45 degrees
 //                    drive.turn(Math.toRadians(45));

@@ -25,7 +25,7 @@ public class AutoA extends OpMode {
 //    SampleMecanumDrive drive = new SampleMecanumDrive();
     IMU imu2;
     int stepNbr;
-    int END_STEP_NBR = 2;
+    int END_STEP_NBR = 99;
 
     @Override
     public void init() {
@@ -47,8 +47,8 @@ public class AutoA extends OpMode {
 
             switch (stepNbr) {
                 case 0:
-                    // robotArm.driveMode()
-//                    robotArm.driveMode();
+                     //robotArm.driveMode()
+                    robotArm.driveMode();
                     stepNbr++;
                     mStateTime.reset();
                     break;
@@ -62,60 +62,62 @@ public class AutoA extends OpMode {
                     mStateTime.reset();
                     break;
                 case 2:
-                    trajectory = drive.trajectoryBuilder(new Pose2d())
-                            .strafeRight(20)
-                            .build();
-                    drive.followTrajectory(trajectory);
                     // Turn -90 degrees
-//                    drive.turn(Math.toRadians(90));
+                    drive.turn(Math.toRadians(90));
                     stepNbr++;
                     mStateTime.reset();
                     break;
                 case 3:
                     // Left 3 ft
                     trajectory = drive.trajectoryBuilder(new Pose2d())
-                            .strafeLeft(36)
+                            .forward(36)
                             .build();
                     drive.followTrajectory(trajectory);
                     stepNbr++;
                     mStateTime.reset();
                     break;
                 case 4:
-                    // Turn -45 degrees
-                    drive.turn(Math.toRadians(45));
-                    stepNbr++;
-                    mStateTime.reset();
-                    break;
+                    robotArm.openClaw();
                 case 5:
-                    //Forward-Right 3 in
-                    stepNbr++;
-                    mStateTime.reset();
-                    break;
-                case 6:
-                    //robotArm.toHighBasket()
-                    stepNbr++;
-                    mStateTime.reset();
-                    break;
-                case 7:
-                    //robotArm.openClaw()
-                    stepNbr++;
-                    mStateTime.reset();
-                    break;
-                case 8:
-                    //robotArm.driveMode()
-                    stepNbr++;
-                    mStateTime.reset();
-                    break;
-                case 9:
-                    //Rotate -45 degrees
-                    stepNbr++;
-                    mStateTime.reset();
-                    break;
-                case 10:
-                    //Right 10-11 ft
-                    stepNbr++;
-                    mStateTime.reset();
-                    break;
+                    trajectory = drive.trajectoryBuilder(new Pose2d())
+                            .back(120)
+                            .build();
+                    drive.followTrajectory(trajectory);
+//                    // Turn -45 degrees
+//                    drive.turn(Math.toRadians(45));
+//                    stepNbr++;
+//                    mStateTime.reset();
+//                    break;
+//                case 5:
+//                    //Forward-Right 3 in
+//                    stepNbr++;
+//                    mStateTime.reset();
+//                    break;
+//                case 6:
+//                    //robotArm.toHighBasket()
+//                    stepNbr++;
+//                    mStateTime.reset();
+//                    break;
+//                case 7:
+//                    //robotArm.openClaw()
+//                    stepNbr++;
+//                    mStateTime.reset();
+//                    break;
+//                case 8:
+//                    //robotArm.driveMode()
+//                    stepNbr++;
+//                    mStateTime.reset();
+//                    break;
+//                case 9:
+//                    //Rotate -45 degrees
+//                    stepNbr++;
+//                    mStateTime.reset();
+//                    break;
+//                case 10:
+//                    //Right 10-11 ft
+//                    stepNbr++;
+//                    mStateTime.reset();
+//                    break;
                 default:
                     driveFieldRelative(0, 0, 0);
                     telemetry.addData("Auto", "Finished");

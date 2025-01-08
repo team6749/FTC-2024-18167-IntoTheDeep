@@ -62,7 +62,7 @@ public class AutoBMoveToObservation extends OpMode {
                     break;
                 case 2:
                     trajectory = drive.trajectoryBuilder(new Pose2d())
-                            .strafeRight(48)
+                            .strafeRight(43)
                             .build();
                     drive.followTrajectory(trajectory);
                     // Turn -90 degrees
