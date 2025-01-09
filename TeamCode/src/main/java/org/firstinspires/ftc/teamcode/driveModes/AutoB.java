@@ -9,14 +9,13 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.hardware.RobotArm;
 
 
-@Autonomous(name = "Auto-A")
+@Autonomous(name = "Auto-B")
 
-public class AutoA extends OpMode {
+public class AutoB extends OpMode {
     SampleMecanumDrive drive;
     RobotArm robotArm;
     private ElapsedTime mStateTime = new ElapsedTime();
@@ -55,7 +54,7 @@ public class AutoA extends OpMode {
                 case 1:
                     // Move forward 3 in
                     Trajectory fwd3 = drive.trajectoryBuilder(new Pose2d())
-                            .forward(3)
+                            .forward(23)
                             .build();
                     drive.followTrajectory(fwd3);
                     stepNbr++;
@@ -68,20 +67,28 @@ public class AutoA extends OpMode {
                     mStateTime.reset();
                     break;
                 case 3:
-                    // Left 3 ft
                     trajectory = drive.trajectoryBuilder(new Pose2d())
-                            .forward(36)
+                            .strafeLeft(20)
                             .build();
                     drive.followTrajectory(trajectory);
                     stepNbr++;
                     mStateTime.reset();
                     break;
                 case 4:
-                    robotArm.openClaw();
+                    // Left 3 ft
+                    trajectory = drive.trajectoryBuilder(new Pose2d())
+                            .forward(60)
+                            .build();
+                    drive.followTrajectory(trajectory);
                     stepNbr++;
                     mStateTime.reset();
                     break;
                 case 5:
+                    robotArm.openClaw();
+                    stepNbr++;
+                    mStateTime.reset();
+                    break;
+                case 6:
                     trajectory = drive.trajectoryBuilder(new Pose2d())
                             .back(120)
                             .build();

@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.driveModes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.hardware.RobotArm;
 import org.firstinspires.ftc.teamcode.hardware.RobotClaw;
 import org.firstinspires.ftc.teamcode.subsystems.CraneSystem;
 
+@Disabled
 @TeleOp(name="TeleOp: Field-Oriented", group="Iterative OpMode")
 public class FieldRelativeMecanumDriveOpMode extends OpMode {
     MecanumDrive drive = new MecanumDrive();

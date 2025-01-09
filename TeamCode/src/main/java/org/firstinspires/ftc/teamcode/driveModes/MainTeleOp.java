@@ -1,13 +1,12 @@
 package org.firstinspires.ftc.teamcode.driveModes;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-@TeleOp(name="MAIN-Blue", group="Iterative OpMode")
+@TeleOp(name="MAIN", group="Iterative OpMode")
 
-public class MainTeleOpBlue extends MainDriveOpMode {
+public class MainTeleOp extends MainDriveOpMode {
 
-    public MainTeleOpBlue() {
+    public MainTeleOp() {
         super(true);
     }
 

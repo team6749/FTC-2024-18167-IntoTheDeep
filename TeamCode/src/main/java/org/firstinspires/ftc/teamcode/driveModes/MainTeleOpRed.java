@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.driveModes;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+@Disabled
 @TeleOp(name="MAIN-Red", group="Iterative OpMode")
 
 public class MainTeleOpRed extends MainDriveOpMode {

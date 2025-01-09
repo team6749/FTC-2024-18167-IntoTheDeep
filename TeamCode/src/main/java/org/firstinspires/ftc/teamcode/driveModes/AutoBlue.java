@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.driveModes;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.hardware.MecanumDrive;
@@ -16,6 +17,7 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
+@Disabled
 @Autonomous (name="Auto-Blue")
 
 public class AutoBlue extends OpMode {
