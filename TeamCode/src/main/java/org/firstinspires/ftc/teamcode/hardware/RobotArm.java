@@ -122,6 +122,7 @@ public class RobotArm {
             currentRotationDesiredPosition = desiredPosition;
             liftMotor.setTargetPosition(desiredPosition);
             doRotation();
+            slideToPosition(getCurrentExtensionDesiredPosition());
         } else {
             liftMotor.setPower(0);
         }
@@ -223,6 +224,11 @@ public class RobotArm {
     public void slideToPosition(int desiredPosition) {
         if (EXTENSION_MIN <= desiredPosition &&
                 desiredPosition <= EXTENSION_MAX) {
+            if (getCurrentRotationPosition() <= (ROTATE_LOW_BASKET -50)) {
+                //Easy way to make sure that we can't go over 42" total
+
+                desiredPosition = Math.min(desiredPosition, EXTENSION_LOW_BASKET);
+            }
             extenderMotor.setTargetPosition(desiredPosition);
             if (desiredPosition != currentExtensionDesiredPosition) {
                 //Reset our timer for last time that we were at position;
